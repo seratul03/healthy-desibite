@@ -1,0 +1,90 @@
+# ==================================================
+# .gitignore for Flask Food Delivery Web App
+# ==================================================
+
+# --------------------------------------------------
+# SENSITIVE DATA — never commit these
+# --------------------------------------------------
+.env
+.env.*
+accounts.json
+orders.json
+*.secret
+secrets.json
+
+# --------------------------------------------------
+# LARGE / GENERATED ASSETS
+# Heavy images that bloat the repo and slow uploads.
+# Host them on a CDN or cloud storage instead.
+# --------------------------------------------------
+# Specific oversized files (>1 MB each)
+Food_land/assets/images/hero/OWN COLOR SP*
+Food_land/assets/images/hero/Gemini_Gene*
+Food_land/assets/images/gram/eyes.png
+Food_land/assets/images/gram/deliver.png
+Food_land/assets/images/products/splash.*
+
+# --------------------------------------------------
+# SCRATCH / TEMPORARY FILES
+# --------------------------------------------------
+img.txt
+q.txt
+*.tmp
+*.bak
+*.swp
+*.log
+
+# --------------------------------------------------
+# PYTHON
+# --------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+MANIFEST
+*.cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# --------------------------------------------------
+# FLASK / WEB
+# --------------------------------------------------
+instance/
+flask_session/
+*.db
+*.sqlite3
+celerybeat-schedule
+
+# --------------------------------------------------
+# VIRTUAL ENVIRONMENTS
+# --------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+.env/
+
+# --------------------------------------------------
+# IDEs & EDITORS
+# --------------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# --------------------------------------------------
+# OPERATING SYSTEM
+# --------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/

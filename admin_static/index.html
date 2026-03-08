@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Login View -->
+    <div id="login-view" class="view active">
+        <div class="login-wrapper">
+            <div class="card login-card">
+                <div class="logo">
+                    <i class="fa-solid fa-user-shield"></i> Admin Portal
+                </div>
+                <p class="subtitle">Sign in to manage Gourmet Fetch</p>
+                <form id="adminLoginForm">
+                    <div class="input-group">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="adminEmail" placeholder="Admin Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="adminPassword" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="primary-btn">Access Portal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Layout -->
+    <div id="dashboard-view" class="view">
+        <div class="dashboard-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <i class="fa-solid fa-utensils"></i> Gourmet
+                </div>
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li>
+                            <a href="#" class="tab-link active" data-tab="analytics" onclick="switchTab('analytics')">
+                                <i class="fa-solid fa-chart-pie"></i> Analytics
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="tab-link" data-tab="orders" onclick="switchTab('orders')">
+                                <i class="fa-solid fa-clipboard-list"></i> Orders
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="tab-link" data-tab="menu" onclick="switchTab('menu')">
+                                <i class="fa-solid fa-burger"></i> Menu Items
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="logout-btn" onclick="adminLogout()">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <header class="topbar">
+                    <h1 id="pageTitle">Dashboard Analytics</h1>
+                    <div class="user-profile">
+                        <span class="user-name"><i class="fa-solid fa-user-circle"></i> Admin User</span>
+                    </div>
+                </header>
+
+                <div class="content-body">
+                    <!-- Analytics Tab -->
+                    <div id="tab-analytics" class="tab-content active">
+                        <div class="stats-grid">
+                            <div class="stat-card border-primary">
+                                <h3>Total Revenue</h3>
+                                <div class="stat-value">₹<span id="statRevenue">0</span></div>
+                            </div>
+                            <div class="stat-card border-blue">
+                                <h3>Total Orders</h3>
+                                <div class="stat-value" id="statOrders">0</div>
+                            </div>
+                            <div class="stat-card border-yellow">
+                                <h3>Pending Orders</h3>
+                                <div class="stat-value" id="statPending">0</div>
+                            </div>
+                            <div class="stat-card border-green">
+                                <h3>Menu Items</h3>
+                                <div class="stat-value" id="statItems">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="tab-orders" class="tab-content">
+                        <div class="card table-card">
+                            <div class="card-header">
+                                <h2>Recent Orders</h2>
+                                <button class="action-btn" onclick="loadAdminOrders()"><i
+                                        class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminOrdersTableBody">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Menu Tab -->
+                    <div id="tab-menu" class="tab-content">
+                        <div class="menu-layout">
+                            <!-- Add/Edit Form -->
+                            <div class="menu-form-side">
+                                <div class="card sticky-card">
+                                    <h2 class="card-title" id="adminFormTitle">Add New Food Item</h2>
+                                    <form id="adminFoodForm" class="vertical-form">
+                                        <input type="hidden" id="adminFoodId">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" id="adminFoodName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea id="adminFoodDescription"
+                                                placeholder="Detailed food description..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Price (₹)</label>
+                                            <input type="number" id="adminFoodPrice" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Food Image</label>
+                                            <input type="hidden" id="adminFoodImageUrl">
+                                            <div class="upload-zone" id="uploadZone"
+                                                onclick="document.getElementById('adminFoodImageFile').click()">
+                                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                                    <span>Click to upload image</span>
+                                                    <small>JPG, PNG, WEBP &mdash; max 30 MB</small>
+                                                </div>
+                                                <img id="imagePreview" class="upload-preview hidden" alt="Preview">
+                                            </div>
+                                            <input type="file" id="adminFoodImageFile" accept="image/*"
+                                                style="display:none">
+                                            <button type="button" class="remove-img-btn hidden" id="removeImageBtn"
+                                                onclick="clearImageUpload()">
+                                                <i class="fa-solid fa-xmark"></i> Remove image
+                                            </button>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" id="adminFoodBtn" class="primary-btn"><i
+                                                    class="fa-solid fa-plus"></i> Add Food</button>
+                                            <button type="button" id="adminFoodCancel" class="secondary-btn hidden"
+                                                onclick="resetAdminForm()"><i class="fa-solid fa-xmark"></i>
+                                                Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Menu Listing -->
+                            <div class="menu-list-side">
+                                <div class="card table-card">
+                                    <div class="card-header">
+                                        <h2>Current Menu</h2>
+                                    </div>
+                                    <div class="table-responsive list-wrapper">
+                                        <table class="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Image</th>
+                                                    <th>Details</th>
+                                                    <th>Price</th>
+                                                    <th style="text-align: right;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminFoodsTableBody">
+                                                <!-- Dynamic rows -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Notification</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product — Gourmet Fetch</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── Design Tokens ── */
+        :root {
+            --primary: #d4af37;
+            --primary-hover: #b8962e;
+            --accent: #f3dba3;
+            --bg: #071e16;
+            --bg-card: rgba(12, 41, 31, 0.92);
+            --text: #fdfbf7;
+            --text-muted: #aab5b0;
+            --text-faint: #6a7a74;
+            --border: rgba(212, 175, 55, 0.18);
+            --border-strong: rgba(212, 175, 55, 0.4);
+            --gold: #d4af37;
+            --gold-light: #f3dba3;
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.18);
+            --radius: 20px;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Lato', sans-serif;
+            --transition: 0.3s ease;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: fixed;
+            top: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 3rem);
+            max-width: 1100px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.75rem;
+            border-radius: 100px;
+            background: rgba(4, 18, 13, 0.78);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .nav-logo {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            cursor: pointer;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-logo i { color: var(--gold); margin-right: 0.4rem; }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .nav-back:hover {
+            color: var(--gold);
+            border-color: var(--border-strong);
+            background: rgba(212, 175, 55, 0.06);
+        }
+
+        .nav-cart {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .nav-cart:hover { color: var(--gold); border-color: var(--border-strong); }
+
+        .cart-badge {
+            background: var(--gold);
+            color: #071e16;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ── Main layout ── */
+        .page-wrapper {
+            padding: 6.5rem 5% 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ── Skeleton loader ── */
+        .skeleton-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .skel-box {
+            background: rgba(212, 175, 55, 0.06);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .skel-img  { height: 480px; }
+        .skel-info { height: 480px; }
+
+        /* ── Product grid ── */
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        /* ── Image section ── */
+        .image-section {
+            position: sticky;
+            top: 6rem;
+        }
+
+        .image-frame {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .image-frame img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .image-frame:hover img { transform: scale(1.04); }
+
+        .availability-tag {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(7, 30, 22, 0.88);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.75rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .availability-tag.unavailable {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+        }
+
+        .image-shine {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ── Info section ── */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .product-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.3rem 0.85rem;
+            border-radius: 50px;
+            background: rgba(212, 175, 55, 0.06);
+            width: fit-content;
+        }
+
+        .product-name {
+            font-family: var(--font-heading);
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+        }
+
+        .price-block {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .currency {
+            font-family: var(--font-body);
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .price-value {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .price-note {
+            font-size: 0.8rem;
+            color: var(--text-faint);
+            margin-left: 0.25rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, var(--border-strong), transparent);
+        }
+
+        .desc-block h3 {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            color: var(--gold-light);
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+
+        .desc-block p {
+            color: var(--text-muted);
+            font-size: 0.97rem;
+            line-height: 1.75;
+        }
+
+        /* ── Quantity selector ── */
+        .qty-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .qty-label {
+            font-size: 0.85rem;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            border: 1px solid var(--border-strong);
+            border-radius: 50px;
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            color: var(--gold);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover { background: rgba(212, 175, 55, 0.12); }
+
+        .qty-display {
+            min-width: 44px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        /* ── Action buttons ── */
+        .action-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-size: 0.97rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            transition: var(--transition);
+        }
+
+        .btn-cart {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-cart:hover {
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+        }
+
+        .btn-buy {
+            background: linear-gradient(135deg, var(--primary), #c9a227);
+            color: #071e16;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .btn-buy:hover {
+            background: linear-gradient(135deg, #c9a227, #a88520);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px rgba(212, 175, 55, 0.32);
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Feature pills ── */
+        .features-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .feature-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            background: rgba(12, 41, 31, 0.5);
+        }
+
+        .feature-pill i { color: var(--gold); font-size: 0.72rem; }
+
+        /* ── Error / Not found ── */
+        .error-state {
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+
+        .error-state i {
+            font-size: 4rem;
+            color: var(--text-faint);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .error-state h2 {
+            font-family: var(--font-heading);
+            color: var(--gold-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .error-state p { color: var(--text-muted); margin-bottom: 2rem; }
+
+        .btn-back-lg {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--primary), #c9a227);
+            color: #071e16;
+            font-weight: 700;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-back-lg:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            background: rgba(12, 41, 31, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            padding: 0.85rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 999;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            box-shadow: var(--shadow-md);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast i { color: var(--gold); }
+
+        /* ── Responsive ── */
+        @media (max-width: 860px) {
+            .product-grid { grid-template-columns: 1fr; }
+            .image-section { position: static; }
+            .product-name { font-size: 1.9rem; }
+            .price-value { font-size: 2.2rem; }
+            .skeleton-wrap { grid-template-columns: 1fr; }
+            .skel-img { height: 280px; }
+        }
+
+        @media (max-width: 480px) {
+            .page-wrapper { padding: 5.5rem 4% 3rem; }
+            .navbar { width: calc(100% - 2rem); padding: 0 1rem; }
+            .action-row { flex-direction: column; }
+            .nav-logo span { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <button class="nav-back" onclick="history.back()">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+
+            <a class="nav-logo" href="/shop">
+                <i class="fa-solid fa-utensils"></i>
+                <span>Gourmet Fetch</span>
+            </a>
+
+            <div class="nav-cart" onclick="window.location.href='/shop'">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span class="cart-badge" id="navCartCount">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="page-wrapper">
+
+        <!-- Loading skeleton -->
+        <div class="skeleton-wrap" id="skeletonLoader">
+            <div class="skel-box skel-img"></div>
+            <div class="skel-box skel-info"></div>
+        </div>
+
+        <!-- Error state (hidden by default) -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <i class="fa-solid fa-bowl-food"></i>
+            <h2>Dish Not Found</h2>
+            <p>This item may no longer be available or the link might be incorrect.</p>
+            <button class="btn-back-lg" onclick="window.location.href='/shop'">
+                <i class="fa-solid fa-arrow-left"></i> Back to Menu
+            </button>
+        </div>
+
+        <!-- Product detail (hidden until loaded) -->
+        <div class="product-grid" id="productGrid" style="display: none;">
+
+            <!-- Left: Image -->
+            <div class="image-section">
+                <div class="image-frame">
+                    <img id="pdImage" src="" alt="Product Image"
+                        onerror="this.src='https://placehold.co/600x450/071e16/d4af37?text=No+Image'">
+                    <div class="availability-tag" id="pdAvailTag">Available Now</div>
+                    <div class="image-shine"></div>
+                </div>
+            </div>
+
+            <!-- Right: Info -->
+            <div class="info-section">
+
+                <div class="product-label">
+                    <i class="fa-solid fa-star"></i> Premium Dish
+                </div>
+
+                <h1 class="product-name" id="pdName">—</h1>
+
+                <div class="price-block">
+                    <span class="currency">₹</span>
+                    <span class="price-value" id="pdPrice">0</span>
+                    <span class="price-note">/ serving</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="desc-block">
+                    <h3>About This Dish</h3>
+                    <p id="pdDescription">Loading description…</p>
+                </div>
+
+                <!-- Quantity -->
+                <div class="qty-row">
+                    <span class="qty-label">Quantity</span>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty(-1)" aria-label="Decrease">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span class="qty-display" id="qtyDisplay">1</span>
+                        <button class="qty-btn" onclick="changeQty(1)" aria-label="Increase">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="action-row">
+                    <button class="btn btn-cart" id="addToCartBtn" onclick="addToCart()">
+                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-buy" id="buyNowBtn" onclick="buyNow()">
+                        <i class="fa-solid fa-bolt"></i> Buy Now
+                    </button>
+                </div>
+
+                <!-- Feature pills -->
+                <div class="features-row">
+                    <span class="feature-pill"><i class="fa-solid fa-truck-fast"></i> Fast Delivery</span>
+                    <span class="feature-pill"><i class="fa-solid fa-shield-halved"></i> Freshly Prepared</span>
+                    <span class="feature-pill"><i class="fa-solid fa-rotate-left"></i> Easy Returns</span>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Notification</span>
+    </div>
+
+    <script>
+        /* ─────────────────────────────────────────────
+           Cart helpers (localStorage-backed)
+           Key: "gourmet_cart" — same key used by shop
+        ───────────────────────────────────────────── */
+        const CART_KEY = 'gourmet_cart';
+
+        function getCart() {
+            try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        }
+
+        function getCartCount() {
+            return getCart().reduce((sum, item) => sum + (item.quantity || 1), 0);
+        }
+
+        function refreshCartBadge() {
+            document.getElementById('navCartCount').textContent = getCartCount();
+        }
+
+        /* ─────────────────────────────────────────────
+           Toast
+        ───────────────────────────────────────────── */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        /* ─────────────────────────────────────────────
+           Quantity control
+        ───────────────────────────────────────────── */
+        let quantity = 1;
+
+        function changeQty(delta) {
+            quantity = Math.max(1, quantity + delta);
+            document.getElementById('qtyDisplay').textContent = quantity;
+        }
+
+        /* ─────────────────────────────────────────────
+           Load product from API
+        ───────────────────────────────────────────── */
+        let product = null;
+
+        async function loadProduct() {
+            // Extract UUID from /product/<product_id>
+            const pathParts = window.location.pathname.split('/');
+            const productId = pathParts[pathParts.length - 1];
+
+            if (!productId) {
+                showError();
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/product/${productId}`);
+                if (!res.ok) { showError(); return; }
+
+                const data = await res.json();
+                if (data.status === 'error') { showError(); return; }
+
+                product = data;
+                renderProduct(data);
+            } catch (err) {
+                console.error('Failed to load product:', err);
+                showError();
+            }
+        }
+
+        function renderProduct(p) {
+            document.title = `${p.name} — Gourmet Fetch`;
+
+            // Image: handle both full URLs (Supabase Storage) and relative paths
+            const imgSrc = p.image
+                ? (p.image.startsWith('http') ? p.image : `/${p.image}`)
+                : 'https://placehold.co/600x450/071e16/d4af37?text=No+Image';
+            document.getElementById('pdImage').src = imgSrc;
+
+            document.getElementById('pdName').textContent = p.name;
+            document.getElementById('pdPrice').textContent = parseFloat(p.price).toFixed(2);
+            document.getElementById('pdDescription').textContent =
+                p.description || 'A delicious dish carefully prepared for you. No additional details provided.';
+
+            // Availability badge
+            const tag = document.getElementById('pdAvailTag');
+            if (!p.is_available) {
+                tag.textContent = 'Currently Unavailable';
+                tag.classList.add('unavailable');
+                document.getElementById('addToCartBtn').disabled = true;
+                document.getElementById('buyNowBtn').disabled = true;
+            }
+
+            // Swap skeleton → product grid
+            document.getElementById('skeletonLoader').style.display = 'none';
+            document.getElementById('productGrid').style.display = 'grid';
+        }
+
+        function showError() {
+            document.getElementById('skeletonLoader').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        }
+
+        /* ─────────────────────────────────────────────
+           Cart actions
+        ───────────────────────────────────────────── */
+        function addToCart() {
+            if (!product) return;
+
+            const cart = getCart();
+            const existing = cart.find(c => c.id === product.id);
+
+            if (existing) {
+                existing.quantity = (existing.quantity || 1) + quantity;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    description: product.description || '',
+                    price: parseFloat(product.price),
+                    image: product.image || '',
+                    quantity: quantity
+                });
+            }
+
+            saveCart(cart);
+            refreshCartBadge();
+            showToast(`${product.name} added to cart`);
+        }
+
+        function buyNow() {
+            if (!product) return;
+
+            // Add to cart first so checkout page sees it
+            const cart = getCart();
+            const existing = cart.find(c => c.id === product.id);
+            if (existing) {
+                existing.quantity = (existing.quantity || 1) + quantity;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    description: product.description || '',
+                    price: parseFloat(product.price),
+                    image: product.image || '',
+                    quantity: quantity
+                });
+            }
+            saveCart(cart);
+
+            // Navigate to shop with checkout intent
+            window.location.href = '/shop?checkout=1';
+        }
+
+        /* ─────────────────────────────────────────────
+           Init
+        ───────────────────────────────────────────── */
+        refreshCartBadge();
+        loadProduct();
+    </script>
+
+</body>
+
+</html>

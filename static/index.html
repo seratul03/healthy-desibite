@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gourmet Fetch | Premium Food Delivery</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar" id="mainNavbar" style="display: none;">
+        <div class="nav-container">
+            <div class="logo" onclick="showView('menu-view')">
+                <i class="fa-solid fa-utensils"></i> Gourmet Fetch
+            </div>
+
+            <div class="search-container">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search delicious food...">
+            </div>
+
+            <div class="nav-actions">
+                <button class="nav-btn" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+                <div class="nav-link" onclick="showView('track-view')">
+                    <i class="fa-solid fa-route"></i> <span class="nav-text nav-links-text">Track</span>
+                </div>
+                <div class="nav-link" id="accountLink" onclick="showView('auth-view')">
+                    <i class="fa-regular fa-user"></i> <span class="nav-text nav-links-text">Sign In</span>
+                </div>
+                <div class="cart-icon" id="cartBtn">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Menu View -->
+        <section id="menu-view" class="view">
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <h1>Craving something <span class="highlight">delicious?</span></h1>
+                    <p>Get premium quality food delivered straight to your door in minutes.</p>
+                </div>
+            </div>
+
+            <div class="controls-wrapper">
+                <div class="categories" id="categoryContainer" style="display: none;">
+                </div>
+                <div class="sorting">
+                    <div class="select-wrapper">
+                        <select id="sortSelect">
+                            <option value="default">Sort by...</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-grid" id="menuGrid">
+                <!-- Food cards injected here -->
+            </div>
+        </section>
+
+        <!-- Auth View -->
+        <section id="auth-view" class="view form-view active">
+            <div class="glass-card form-card">
+                <h2 id="authTitle">Welcome Back</h2>
+                <p class="subtitle" id="authSubtitle">Sign in to unlock amazing features</p>
+                <form id="authForm">
+                    <div class="input-group" id="nameGroup" style="display: none;">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="authName" placeholder="Full Name">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="authEmail" placeholder="Email Address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="authPassword" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="primary-btn btn-lg">Sign In</button>
+                </form>
+                <p class="toggle-text" id="toggleAuth">New here? <span>Create Account</span></p>
+            </div>
+        </section>
+
+        <!-- Account View -->
+        <section id="account-view" class="view form-view">
+            <div class="glass-card form-card account-card">
+                <div class="avatar-circle">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <h2>My Account</h2>
+                <div class="account-info">
+                    <div class="info-row">
+                        <span class="label">Name</span>
+                        <span class="value" id="accName"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email</span>
+                        <span class="value" id="accEmail"></span>
+                    </div>
+                </div>
+                <button class="danger-btn btn-lg" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log
+                    Out</button>
+            </div>
+        </section>
+
+        <!-- Track Order View -->
+        <section id="track-view" class="view form-view">
+            <div class="glass-card form-card">
+                <h2>Track Your Order</h2>
+                <p class="subtitle">Enter your Order ID to see real-time status</p>
+                <div class="input-group">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="text" id="trackOrderId" placeholder="e.g. ORD-1A2B3C" required>
+                </div>
+                <button class="primary-btn btn-lg" onclick="trackOrder()">Track Order</button>
+
+                <div id="trackResult" style="display: none; margin-top: 2rem;">
+                    <div class="status-indicator">
+                        <div class="status-step active" id="stepPending">
+                            <div class="step-icon"><i class="fa-solid fa-clock"></i></div>
+                            <p>Pending</p>
+                        </div>
+                        <div class="status-line" id="line1"></div>
+                        <div class="status-step" id="stepPreparing">
+                            <div class="step-icon"><i class="fa-solid fa-fire-burner"></i></div>
+                            <p>Preparing</p>
+                        </div>
+                        <div class="status-line" id="line2"></div>
+                        <div class="status-step" id="stepDelivered">
+                            <div class="step-icon"><i class="fa-solid fa-check-double"></i></div>
+                            <p>Delivered</p>
+                        </div>
+                    </div>
+                    <div class="track-details">
+                        <h3 id="trackStatusText">Status: Pending</h3>
+                        <p id="trackOrderTotal" class="highlight-text"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment View -->
+        <section id="payment-view" class="view form-view">
+            <div class="glass-card checkout-card">
+                <div class="checkout-header">
+                    <h2>Secure Checkout</h2>
+                    <div class="payment-summary">Total: ₹<span id="payTotal">0</span></div>
+                </div>
+
+                <form id="paymentForm">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3><span class="step-num">1</span> Delivery Details</h3>
+                            <div class="input-group">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" id="payName" placeholder="Full Name" required>
+                            </div>
+                            <div class="input-group">
+                                <i class="fa-solid fa-phone"></i>
+                                <input type="tel" id="payPhone" placeholder="Phone Number" required>
+                            </div>
+                            <div class="input-group texture-group">
+                                <textarea id="payAddress" placeholder="Full Delivery Address" rows="3"
+                                    required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3><span class="step-num">2</span> Payment Details</h3>
+
+                            <div class="payment-methods" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="paymentMethod" value="card" checked
+                                        onchange="document.getElementById('cardPayment').style.display='block'; document.getElementById('qrPayment').style.display='none';">
+                                    <i class="fa-regular fa-credit-card"></i> Credit/Debit Card
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="paymentMethod" value="qr"
+                                        onchange="document.getElementById('cardPayment').style.display='none'; document.getElementById('qrPayment').style.display='flex';">
+                                    <i class="fa-solid fa-qrcode"></i> Scan QR Code
+                                </label>
+                            </div>
+
+                            <div id="cardPayment">
+                                <div class="input-group">
+                                    <i class="fa-regular fa-credit-card"></i>
+                                    <input type="text" placeholder="Cardholder Name">
+                                </div>
+                                <div class="input-group">
+                                    <i class="fa-brands fa-cc-visa"></i>
+                                    <input type="text" placeholder="Card Number (16 digits)" maxlength="16">
+                                </div>
+                                <div class="form-row">
+                                    <div class="input-group">
+                                        <input type="text" placeholder="MM/YY" maxlength="5">
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="password" placeholder="CVV" maxlength="3">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="qrPayment"
+                                style="display: none; flex-direction: column; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center;">
+                                <p style="margin-bottom: 1rem; color: var(--text-muted);">Scan this QR code with any UPI
+                                    or bank app to pay securely.</p>
+                                <div
+                                    style="background: white; padding: 10px; border-radius: 8px; display: inline-block;">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=gourmetfetch@bank&pn=GourmetFetch&cu=INR"
+                                        alt="Payment QR Code">
+                                </div>
+                                <p style="margin-top: 1rem; font-weight: 600; color: var(--primary);">Amount to pay:
+                                    ₹<span id="qrPayTotal">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-actions">
+                        <button type="button" class="secondary-btn btn-lg" onclick="showView('menu-view')">Back to
+                            Menu</button>
+                        <button type="submit" class="primary-btn btn-lg checkout-submit"><i
+                                class="fa-solid fa-lock"></i> Pay Now</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Confirmation View -->
+        <section id="confirmation-view" class="view form-view">
+            <div class="glass-card form-card success-card">
+                <div class="success-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2>Order Confirmed!</h2>
+                <p>Order ID: <strong id="orderIdText" class="highlight"></strong></p>
+                <p>Your food is being prepared and will be delivered to you shortly.</p>
+                <button class="primary-btn btn-lg mt-4" onclick="showView('track-view')">Track Order</button>
+                <button class="secondary-btn btn-lg" onclick="showView('menu-view')">Back to Menu</button>
+            </div>
+        </section>
+
+        <!-- Product Details View -->
+        <section id="product-view" class="view product-details-view">
+            <div class="back-nav" onclick="showView('menu-view')">
+                <i class="fa-solid fa-arrow-left"></i> Back to Menu
+            </div>
+            <div class="glass-card product-details-card">
+                <div class="product-image-section">
+                    <img id="pdImage" src="" alt="Product Image">
+                </div>
+                <div class="product-info-section">
+                    <h2 id="pdTitle">Product Name</h2>
+                    <div class="pd-price-row">
+                        <span class="pd-price" id="pdPrice">₹0</span>
+                    </div>
+                    <div class="pd-divider"></div>
+                    <div class="pd-description">
+                        <h3>About this item</h3>
+                        <p id="pdDescription">Product description goes here.</p>
+                    </div>
+                    <div class="pd-actions">
+                        <button class="secondary-btn btn-lg" id="pdAddBtn"><i class="fa-solid fa-cart-plus"></i> Add to
+                            Cart</button>
+                        <button class="primary-btn btn-lg" id="pdBuyBtn"><i class="fa-solid fa-bolt"></i> Buy
+                            Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar Overlay -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2><i class="fa-solid fa-bag-shopping"></i> Your Cart</h2>
+            <button class="icon-btn" onclick="closeCart()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItemsList">
+            <!-- Empty cart placeholder -->
+            <div class="empty-cart">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <p>Your cart is empty</p>
+                <button class="secondary-btn" onclick="closeCart()">Start Browsing</button>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total Amount</span>
+                <h3>₹<span id="cartTotal">0</span></h3>
+            </div>
+            <button id="checkoutBtn" class="primary-btn btn-lg cart-checkout-btn" onclick="initiateCheckout()">
+                Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">Notification</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fa-solid fa-utensils"></i> Gourmet Fetch
+                </div>
+                <p class="footer-tagline">Premium food delivery,<br>straight to your door.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="#" onclick="showView('menu-view'); return false;">Menu</a></li>
+                    <li><a href="#" onclick="showView('track-view'); return false;">Track Order</a></li>
+                    <li><a href="#" onclick="showView('auth-view'); return false;">Sign In</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="#">Appetizers</a></li>
+                    <li><a href="#">Main Course</a></li>
+                    <li><a href="#">Desserts</a></li>
+                    <li><a href="#">Beverages</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:hello@gourmetfetch.com">hello@gourmetfetch.com</a></li>
+                    <li><a href="tel:+911234567890">+91 12345 67890</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Gourmet Fetch. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

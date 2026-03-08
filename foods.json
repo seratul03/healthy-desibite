@@ -1,0 +1,226 @@
+[
+    {
+        "id": 1,
+        "name": "Cheese Garlic Bread",
+        "category": "Appetizers & Snacks",
+        "price": 149.0,
+        "image": "Foods/Appetizers & Snacks/Cheese Garlic Bread.jpg"
+    },
+    {
+        "id": 2,
+        "name": "Chicken Tikka Skewers",
+        "category": "Appetizers & Snacks",
+        "price": 249.0,
+        "image": "Foods/Appetizers & Snacks/Chicken Tikka Skewers.jpg"
+    },
+    {
+        "id": 3,
+        "name": "Classic French Fries",
+        "category": "Appetizers & Snacks",
+        "price": 99.0,
+        "image": "Foods/Appetizers & Snacks/Classic French Fries.jpg"
+    },
+    {
+        "id": 4,
+        "name": "Loaded Nachos",
+        "category": "Appetizers & Snacks",
+        "price": 199.0,
+        "image": "Foods/Appetizers & Snacks/Loaded Nachos.jpg"
+    },
+    {
+        "id": 5,
+        "name": "Mozzarella Sticks",
+        "category": "Appetizers & Snacks",
+        "price": 179.0,
+        "image": "Foods/Appetizers & Snacks/Mozzarella Sticks.jpg"
+    },
+    {
+        "id": 6,
+        "name": "Veggie Spring Rolls",
+        "category": "Appetizers & Snacks",
+        "price": 129.0,
+        "image": "Foods/Appetizers & Snacks/Veggie Spring Rolls.jpg"
+    },
+    {
+        "id": 7,
+        "name": "Coffee Caramel Milkshake",
+        "category": "Beverages",
+        "price": 149.0,
+        "image": "Foods/Beverages/Coffee Caramel Milkshakes.jpg"
+    },
+    {
+        "id": 8,
+        "name": "Fresh Lime Soda",
+        "category": "Beverages",
+        "price": 79.0,
+        "image": "Foods/Beverages/Fresh Lime Soda.jpeg"
+    },
+    {
+        "id": 9,
+        "name": "Iced Caramel Macchiato",
+        "category": "Beverages",
+        "price": 159.0,
+        "image": "Foods/Beverages/Iced Caramel Macchiato.jpg"
+    },
+    {
+        "id": 10,
+        "name": "Mango Lassi",
+        "category": "Beverages",
+        "price": 110.0,
+        "image": "Foods/Beverages/Mango Lassi.jpg"
+    },
+    {
+        "id": 11,
+        "name": "Strawberry Milkshake",
+        "category": "Beverages",
+        "price": 129.0,
+        "image": "Foods/Beverages/Strawberry Milkshake.jpg"
+    },
+    {
+        "id": 12,
+        "name": "Chocolate Fudge Brownie",
+        "category": "Desserts",
+        "price": 129.0,
+        "image": "Foods/Desserts/Chocolate Fudge Brownie.jpg"
+    },
+    {
+        "id": 13,
+        "name": "Classic Tiramisu",
+        "category": "Desserts",
+        "price": 249.0,
+        "image": "Foods/Desserts/Classic Tiramisu.jpeg"
+    },
+    {
+        "id": 14,
+        "name": "Gulab Jamun",
+        "category": "Desserts",
+        "price": 99.0,
+        "image": "Foods/Desserts/Gulab jamun.jpg"
+    },
+    {
+        "id": 15,
+        "name": "Ice Cream Sundae",
+        "category": "Desserts",
+        "price": 159.0,
+        "image": "Foods/Desserts/Ice Cream Sundae.jpg"
+    },
+    {
+        "id": 16,
+        "name": "New York Cheesecake",
+        "category": "Desserts",
+        "price": 229.0,
+        "image": "Foods/Desserts/New York Cheesecake.jpg"
+    },
+    {
+        "id": 17,
+        "name": "Classic Cheeseburger",
+        "category": "Fast Food & Casual",
+        "price": 199.0,
+        "image": "Foods/Fast Food & Casual/Classic Cheeseburger.jpg"
+    },
+    {
+        "id": 18,
+        "name": "Crispy Chicken Wrap",
+        "category": "Fast Food & Casual",
+        "price": 179.0,
+        "image": "Foods/Fast Food & Casual/Crispy Chicken Wrap.jpg"
+    },
+    {
+        "id": 19,
+        "name": "Pepperoni Pizza",
+        "category": "Fast Food & Casual",
+        "price": 349.0,
+        "image": "Foods/Fast Food & Casual/Pepperoni Pizza.jpeg"
+    },
+    {
+        "id": 20,
+        "name": "Spicy Fried Chicken Wings",
+        "category": "Fast Food & Casual",
+        "price": 249.0,
+        "image": "Foods/Fast Food & Casual/Spicy Fried Chicken Wings.jpg"
+    },
+    {
+        "id": 21,
+        "name": "Veggie Club Sandwich",
+        "category": "Fast Food & Casual",
+        "price": 149.0,
+        "image": "Foods/Fast Food & Casual/Veggie Club Sandwich.jpg"
+    },
+    {
+        "id": 22,
+        "name": "Margherita Pizza",
+        "category": "Fast Food & Casual",
+        "price": 299.0,
+        "image": "Foods/Fast Food & Casual/margherita pizza.jpg"
+    },
+    {
+        "id": 23,
+        "name": "Butter Chicken",
+        "category": "Main Course",
+        "price": 349.0,
+        "image": "Foods/Main Course/Butter Chicken.jpeg"
+    },
+    {
+        "id": 24,
+        "name": "Grilled Chicken Caesar Salad",
+        "category": "Main Course",
+        "price": 229.0,
+        "image": "Foods/Main Course/Grilled Chicken Caesar Salad.jpg"
+    },
+    {
+        "id": 25,
+        "name": "Grilled Salmon with Asparagus",
+        "category": "Main Course",
+        "price": 549.0,
+        "image": "Foods/Main Course/Grilled Salmon with Asparagus.jpg"
+    },
+    {
+        "id": 26,
+        "name": "Macaroni and Cheese",
+        "category": "Main Course",
+        "price": 249.0,
+        "image": "Foods/Main Course/Macaroni and Cheese.jpg"
+    },
+    {
+        "id": 27,
+        "name": "Paneer Tikka Masala",
+        "category": "Main Course",
+        "price": 299.0,
+        "image": "Foods/Main Course/Paneer-Tikka-Masala.jpg"
+    },
+    {
+        "id": 28,
+        "name": "Spaghetti Bolognese",
+        "category": "Main Course",
+        "price": 329.0,
+        "image": "Foods/Main Course/Spaghetti-Bolognese.jpg"
+    },
+    {
+        "id": 29,
+        "name": "Veg Hakka Noodles",
+        "category": "Main Course",
+        "price": 199.0,
+        "image": "Foods/Main Course/Veg Hakka Noodles.jpg"
+    },
+    {
+        "id": 30,
+        "name": "Chicken Biryani",
+        "category": "Main Course",
+        "price": 299.0,
+        "image": "Foods/Main Course/chicken-biryani.jpg"
+    },
+    {
+        "name": "Choco powder",
+        "category": "Desserts",
+        "price": "1000",
+        "image": "path",
+        "id": 31
+    },
+    {
+        "name": "Litchi Lassi",
+        "category": "Desserts",
+        "price": "100",
+        "image": "Foods\\Fast Food & Casual\\litchi.webp",
+        "id": 32
+    }
+]
