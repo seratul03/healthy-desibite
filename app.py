@@ -8,8 +8,7 @@ load_dotenv()
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
-BASE_DIR = r"C:\Users\Seratul Mustakim\Desktop\My Works\Food delivery web"
-os.makedirs(BASE_DIR, exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Supabase Setup — loaded from .env
 SUPABASE_URL = os.environ['SUPABASE_URL']
@@ -20,37 +19,37 @@ supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)  # by
 
 @app.route('/')
 def landing():
-    return send_from_directory('Food_land', 'index.html')
+    return send_from_directory(os.path.join(BASE_DIR, 'Food_land'), 'index.html')
 
 @app.route('/shop')
 def shop():
-    return send_from_directory('static', 'index.html')
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), 'index.html')
 
 # Serve Food_land CSS, JS, assets and contact page
 @app.route('/css/<path:filename>')
 def food_land_css(filename):
-    return send_from_directory('Food_land/css', filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'Food_land', 'css'), filename)
 
 @app.route('/js/<path:filename>')
 def food_land_js(filename):
-    return send_from_directory('Food_land/js', filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'Food_land', 'js'), filename)
 
 @app.route('/assets/<path:filename>')
 def food_land_assets(filename):
-    return send_from_directory('Food_land/assets', filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'Food_land', 'assets'), filename)
 
 @app.route('/contact.html')
 def contact():
-    return send_from_directory('Food_land', 'contact.html')
+    return send_from_directory(os.path.join(BASE_DIR, 'Food_land'), 'contact.html')
 
 @app.route('/Foods/<path:filename>')
 def serve_food_images(filename):
-    return send_from_directory('Foods', filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'Foods'), filename)
 
 # --- PRODUCT DETAIL PAGE ---
 @app.route('/product/<product_id>')
 def product_page(product_id):
-    return send_from_directory('static', 'product.html')
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), 'product.html')
 
 @app.route('/api/product/<product_id>', methods=['GET'])
 def get_product(product_id):
@@ -81,7 +80,7 @@ def get_product(product_id):
 # Serve shopping page static files (style, script, landing)
 @app.route('/<path:filename>')
 def serve_static(filename):
-    return send_from_directory('static', filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), filename)
 
 # --- MENU API ---
 @app.route('/api/foods', methods=['GET'])
@@ -239,4 +238,5 @@ def get_order(order_id):
         return jsonify({"status": "error", "message": "Invalid Order ID"}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
