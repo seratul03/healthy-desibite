@@ -135,4 +135,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ====================================================
+     5. MOBILE NAV DRAWER
+     ==================================================== */
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobOverlay   = document.getElementById('mobOverlay');
+  const mobDrawer    = document.getElementById('mobDrawer');
+  const mobCloseBtn  = document.getElementById('mobCloseBtn');
+
+  function openMobileNav() {
+    mobDrawer.classList.add('active');
+    mobOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeMobileNav = function () {
+    mobDrawer.classList.remove('active');
+    mobOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  hamburgerBtn.addEventListener('click', openMobileNav);
+  mobOverlay.addEventListener('click', window.closeMobileNav);
+  mobCloseBtn.addEventListener('click', window.closeMobileNav);
+
 });

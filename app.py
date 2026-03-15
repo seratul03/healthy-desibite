@@ -60,10 +60,12 @@ def get_product(product_id):
         food = food_res.data[0]
 
         variant_res = supabase.table('food_variants').select('*').eq('food_id', product_id).limit(1).execute()
-        image_res = supabase.table('food_images').select('*').eq('food_id', product_id).limit(1).execute()
+        image_res = supabase.table('food_images').select('*').eq('food_id', product_id).execute()
 
         price = float(variant_res.data[0]['price']) if variant_res.data else 0.0
-        image = image_res.data[0]['image_url'] if image_res.data else ''
+        
+        images = [img['image_url'] for img in image_res.data] if image_res.data else []
+        image = images[0] if images else ''
 
         return jsonify({
             'id': food['id'],
@@ -71,6 +73,7 @@ def get_product(product_id):
             'description': food.get('description', ''),
             'price': price,
             'image': image,
+            'images': images,
             'is_available': food.get('is_available', True)
         })
     except Exception as e:
@@ -95,17 +98,26 @@ def get_foods():
         images_res = supabase.table('food_images').select('*').execute()
         
         variants = {v['food_id']: v for v in variants_res.data}
-        images = {i['food_id']: i for i in images_res.data}
+        # Group images by food_id
+        images_by_food = {}
+        for img in images_res.data:
+            fid = img['food_id']
+            if fid not in images_by_food:
+                images_by_food[fid] = []
+            images_by_food[fid].append(img['image_url'])
         
         formatted_foods = []
         for f in foods:
             food_id = f['id']
+            # Fallback to placeholder if no images
+            food_images = images_by_food.get(food_id, ['Foods/placeholder.jpg'])
             formatted_foods.append({
                 'id': food_id,
                 'name': f['name'],
                 'description': f.get('description', ''),
                 'price': variants.get(food_id, {}).get('price', 0),
-                'image': images.get(food_id, {}).get('image_url', 'Foods/placeholder.jpg')
+                'image': food_images[0], # Primary image for listing
+                'images': food_images # Full array for internal use
             })
             
         formatted_foods.sort(key=lambda x: x['name'])
@@ -186,24 +198,22 @@ def login():
 def checkout():
     data = request.json
     try:
-        # Create Order
-        user_id = data.get('user_id') # If client provided user_id
-        
-        order_res = supabase.table('orders').insert({
-            'user_id': user_id if user_id else None,
+        # Create Order — use service-role client to bypass RLS
+        user_id = data.get('user_id') or None
+
+        order_res = supabase_admin.table('orders').insert({
+            'user_id': user_id,
             'total_amount': float(data['total']),
             'status': 'Pending'
         }).execute()
-        
+
         order_id = order_res.data[0]['id']
-        
-        # We need to link the order items to the specific variant ID
-        # Since we modified the frontend, we don't have variants explicitly selected.
-        # We'll fetch the default variants for the ordered foods.
+
+        # Fetch default variants for the ordered foods
         food_ids = [item['id'] for item in data['items']]
-        variants_res = supabase.table('food_variants').select('*').in_('food_id', food_ids).execute()
+        variants_res = supabase_admin.table('food_variants').select('*').in_('food_id', food_ids).execute()
         variant_map = {v['food_id']: v['id'] for v in variants_res.data}
-        
+
         order_items_data = []
         for item in data['items']:
             order_items_data.append({
@@ -213,8 +223,8 @@ def checkout():
                 'quantity': item['quantity'],
                 'price': float(item['price'])
             })
-            
-        supabase.table('order_items').insert(order_items_data).execute()
+
+        supabase_admin.table('order_items').insert(order_items_data).execute()
         
         return jsonify({"status": "success", "message": "Order placed successfully!", "order_id": order_id})
     except Exception as e:
@@ -239,4 +249,4 @@ def get_order(order_id):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)

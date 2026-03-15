@@ -38,7 +38,14 @@
             <li><a href="#gram">On The Gram</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
-        <a href="/shop"><button class="btn-outline">Shop Now</button></a>
+        <div class="nav-right">
+            <a href="/shop"><button class="btn-outline">Shop Now</button></a>
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </nav>
 
     <!-- ================= Hero Section ================= -->
@@ -329,6 +336,24 @@
             <p>&copy; 2026 Makhana Premium. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mob-overlay" id="mobOverlay"></div>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mob-drawer" id="mobDrawer">
+        <div class="mob-drawer-header">
+            <img src="assets/images/brand/logo.png" alt="Logo" style="height: 44px; object-fit: contain;" onerror="this.style.display='none'">
+            <button class="mob-close-btn" id="mobCloseBtn" aria-label="Close menu">&#x2715;</button>
+        </div>
+        <nav class="mob-nav">
+            <a href="#home" class="mob-nav-link" onclick="closeMobileNav()">Home</a>
+            <a href="#flavors" class="mob-nav-link" onclick="closeMobileNav()">Flavors</a>
+            <a href="#gram" class="mob-nav-link" onclick="closeMobileNav()">On The Gram</a>
+            <a href="contact.html" class="mob-nav-link">Contact</a>
+            <a href="/shop" class="mob-shop-link">Shop Now</a>
+        </nav>
+    </div>
 
     <script src="js/script.js"></script>
 </body>

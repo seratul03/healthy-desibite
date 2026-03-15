@@ -1,5 +1,6 @@
 let rawData = [];
 let currentAdmin = null;
+let currentImages = []; // Stores objects: { url: string (data or http), file: File object or null }
 
 const views = document.querySelectorAll('.view');
 const toast = document.getElementById('toast');
@@ -178,9 +179,10 @@ window.loadAdminMenu = async function () {
         }
 
         rawData.forEach(f => {
+            const imgSrc = f.image.startsWith('http') ? f.image : `/${f.image}`;
             tbody.innerHTML += `
                 <tr>
-                    <td><img src="/${f.image}" class="food-img-small" onerror="this.src='https://via.placeholder.com/60'"></td>
+                    <td><img src="${imgSrc}" class="food-img-small" onerror="this.src='https://via.placeholder.com/60'"></td>
                     <td>
                         <div class="food-title">${f.name}</div>
                         <div class="food-meta text-muted text-sm" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.description || 'No description'}</div>
@@ -214,11 +216,19 @@ window.startEditFood = function (id) {
     document.getElementById('adminFoodDescription').value = food.description || '';
     document.getElementById('adminFoodPrice').value = food.price;
 
-    // Show existing image as preview
-    const existingUrl = food.image || '';
-    document.getElementById('adminFoodImageUrl').value = existingUrl;
-    if (existingUrl) {
-        setImagePreview(existingUrl.startsWith('http') ? existingUrl : '/' + existingUrl);
+    // Show existing images as preview
+    let existingUrls = food.images || []; 
+    // Fallback for older data that has a single 'image' string instead of an array
+    if (existingUrls.length === 0 && food.image) {
+        existingUrls = [food.image];
+    }
+    
+    currentImages = existingUrls.map(url => ({ url: url, file: null }));
+    
+    if (currentImages.length > 0) {
+        renderImagePreviews();
+    } else {
+        clearImageUpload();
     }
 
     document.getElementById('adminFoodForm').scrollIntoView({ behavior: 'smooth' });
@@ -234,19 +244,42 @@ window.resetAdminForm = function () {
 }
 
 window.clearImageUpload = function () {
-    document.getElementById('adminFoodImageUrl').value = '';
+    currentImages = [];
     document.getElementById('adminFoodImageFile').value = '';
-    document.getElementById('imagePreview').classList.add('hidden');
+    document.getElementById('imagePreviewContainer').innerHTML = '';
+    document.getElementById('imagePreviewContainer').classList.add('hidden');
     document.getElementById('uploadPlaceholder').classList.remove('hidden');
     document.getElementById('removeImageBtn').classList.add('hidden');
 }
 
-function setImagePreview(src) {
-    const preview = document.getElementById('imagePreview');
-    preview.src = src;
-    preview.classList.remove('hidden');
-    document.getElementById('uploadPlaceholder').classList.add('hidden');
-    document.getElementById('removeImageBtn').classList.remove('hidden');
+function renderImagePreviews() {
+    const container = document.getElementById('imagePreviewContainer');
+    container.innerHTML = '';
+    
+    currentImages.forEach((imgObj, idx) => {
+        const url = imgObj.url;
+        const fullSrc = url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('http') ? url : '/' + url;
+        const imgNode = `<div style="position:relative; width:100%; padding-top:100%; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
+            <img src="${fullSrc}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
+            <button type="button" onclick="removeImageAt(${idx}); event.stopPropagation();" style="position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;"><i class="fa-solid fa-xmark" style="font-size:12px;"></i></button>
+        </div>`;
+        container.innerHTML += imgNode;
+    });
+
+    if (currentImages.length > 0) {
+        container.classList.remove('hidden');
+        document.getElementById('uploadPlaceholder').classList.add('hidden');
+        document.getElementById('removeImageBtn').classList.remove('hidden');
+    } else {
+        clearImageUpload();
+    }
+}
+
+window.removeImageAt = function(index) {
+    currentImages.splice(index, 1);
+    renderImagePreviews();
+    // Also reset file input so the user can re-select the same file if needed
+    document.getElementById('adminFoodImageFile').value = '';
 }
 
 async function handleAdminFoodSubmit(e) {
@@ -258,34 +291,55 @@ async function handleAdminFoodSubmit(e) {
     btn.disabled = true;
 
     try {
-        // Upload image if a new file is selected
-        let imageUrl = document.getElementById('adminFoodImageUrl').value;
-        const fileInput = document.getElementById('adminFoodImageFile');
-
-        if (fileInput.files.length > 0) {
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading image...';
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
-
-            const uploadRes = await fetch('/api/upload-image', {
-                method: 'POST',
-                body: formData
+        let finalImageUrls = [];
+        const filesToUpload = currentImages.filter(img => img.file !== null);
+        
+        if (filesToUpload.length > 0) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading images...';
+            
+            // Upload each file and gather URLs
+            const uploadPromises = filesToUpload.map(async (imgObj) => {
+                const formData = new FormData();
+                formData.append('image', imgObj.file);
+                
+                const uploadRes = await fetch('/api/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                return await uploadRes.json();
             });
-            const uploadData = await uploadRes.json();
-
-            if (uploadData.status !== 'success') {
-                showToast(uploadData.message || 'Image upload failed');
-                return;
+            
+            const results = await Promise.all(uploadPromises);
+            
+            // Reconstruct final image array in same order
+            let uploadedIdx = 0;
+            for (let i = 0; i < currentImages.length; i++) {
+                if (currentImages[i].file !== null) {
+                    const data = results[uploadedIdx];
+                    if (data.status === 'success') {
+                        finalImageUrls.push(data.url);
+                    } else {
+                        showToast(data.message || 'Image upload failed');
+                        btn.innerHTML = originalContent;
+                        btn.disabled = false;
+                        return;
+                    }
+                    uploadedIdx++;
+                } else {
+                    finalImageUrls.push(currentImages[i].url);
+                }
             }
-            imageUrl = uploadData.url;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        } else {
+            // No new files. Just map the existing URLs
+            finalImageUrls = currentImages.map(img => img.url);
         }
 
         const payload = {
             name: document.getElementById('adminFoodName').value,
             description: document.getElementById('adminFoodDescription').value,
             price: document.getElementById('adminFoodPrice').value,
-            image: imageUrl
+            images: finalImageUrls
         };
 
         const url = id ? `/api/foods/${id}` : '/api/foods';
@@ -338,10 +392,22 @@ function setupAdminListeners() {
 
     document.getElementById('adminFoodImageFile').addEventListener('change', function () {
         if (this.files.length > 0) {
-            const reader = new FileReader();
-            reader.onload = e => setImagePreview(e.target.result);
-            reader.readAsDataURL(this.files[0]);
-            document.getElementById('adminFoodImageUrl').value = '';
+            const newArray = Array.from(this.files);
+            let processed = 0;
+            
+            newArray.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    currentImages.push({ url: e.target.result, file: file });
+                    processed++;
+                    if (processed === newArray.length) {
+                        renderImagePreviews();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            // Reset the file input so identical subsequent files will re-fire "change" and can be added again if desired
+            this.value = '';
         }
     });
 }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gourmet Fetch | Premium Food Delivery</title>
+    <title>Desibite | Premium Food Delivery</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
         rel="stylesheet">
@@ -16,7 +16,7 @@
     <nav class="navbar" id="mainNavbar" style="display: none;">
         <div class="nav-container">
             <div class="logo" onclick="showView('menu-view')">
-                <i class="fa-solid fa-utensils"></i> Gourmet Fetch
+                <i class="fa-solid fa-utensils"></i> Desibite
             </div>
 
             <div class="search-container">
@@ -25,19 +25,25 @@
             </div>
 
             <div class="nav-actions">
-                <button class="nav-btn" onclick="toggleTheme()" title="Toggle Theme">
+                <!-- <button class="nav-btn" onclick="toggleTheme()" title="Toggle Theme">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
-                </button>
+                </button> -->
                 <div class="nav-link" onclick="showView('track-view')">
                     <i class="fa-solid fa-route"></i> <span class="nav-text nav-links-text">Track</span>
                 </div>
-                <div class="nav-link" id="accountLink" onclick="showView('auth-view')">
+                <div class="nav-link" id="accountLink">
                     <i class="fa-regular fa-user"></i> <span class="nav-text nav-links-text">Sign In</span>
+                </div>
+                <div class="nav-link" id="logoutLink" style="display: none;" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="nav-text nav-links-text">Log Out</span>
                 </div>
                 <div class="cart-icon" id="cartBtn">
                     <i class="fa-solid fa-bag-shopping"></i>
                     <span id="cartCount">0</span>
                 </div>
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -323,7 +329,7 @@
         <div class="footer-inner">
             <div class="footer-brand">
                 <div class="footer-logo">
-                    <i class="fa-solid fa-utensils"></i> Gourmet Fetch
+                    <i class="fa-solid fa-utensils"></i> Desibite
                 </div>
                 <p class="footer-tagline">Premium food delivery,<br>straight to your door.</p>
             </div>
@@ -335,7 +341,7 @@
                     <li><a href="#" onclick="showView('auth-view'); return false;">Sign In</a></li>
                 </ul>
             </div>
-            <div class="footer-col">
+            <!-- <div class="footer-col">
                 <h4>Categories</h4>
                 <ul>
                     <li><a href="#">Appetizers</a></li>
@@ -343,21 +349,60 @@
                     <li><a href="#">Desserts</a></li>
                     <li><a href="#">Beverages</a></li>
                 </ul>
-            </div>
+            </div> -->
             <div class="footer-col">
                 <h4>Contact</h4>
                 <ul>
-                    <li><a href="mailto:hello@gourmetfetch.com">hello@gourmetfetch.com</a></li>
-                    <li><a href="tel:+911234567890">+91 12345 67890</a></li>
+                    <li><a href="mailto:healthydesibite@gmail.com">Email us</a></li>
+                    <li><a href="https://wa.me/8293252837" target="Hello">Chat on WhatsApp</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 Gourmet Fetch. All rights reserved.</p>
+            <p>&copy; 2026 Desibite. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="script.js"></script>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mob-nav-overlay" id="mobNavOverlay"></div>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mob-nav-drawer" id="mobNavDrawer">
+        <div class="mob-nav-header">
+            <div class="logo">
+                <i class="fa-solid fa-utensils"></i> Desibite
+            </div>
+            <button class="icon-btn" onclick="closeMobileNav()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mob-search-wrap">
+            <i class="fa-solid fa-search mob-search-icon"></i>
+            <input type="text" id="mobSearchInput" placeholder="Search delicious food...">
+        </div>
+
+        <nav class="mob-nav-links">
+            <div class="mob-nav-link" onclick="closeMobileNav(); showView('menu-view')">
+                <i class="fa-solid fa-utensils"></i>
+                <span>Menu</span>
+            </div>
+            <div class="mob-nav-link" onclick="closeMobileNav(); showView('track-view')">
+                <i class="fa-solid fa-route"></i>
+                <span>Track Order</span>
+            </div>
+            <div class="mob-nav-link" id="mobAccountLink">
+                <i class="fa-regular fa-user"></i>
+                <span id="mobAccountText">Sign In</span>
+            </div>
+            <div class="mob-nav-link mob-nav-logout" id="mobLogoutLink" style="display:none;" onclick="closeMobileNav(); logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Log Out</span>
+            </div>
+        </nav>
+    </div>
 </body>
 
 </html>

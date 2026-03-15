@@ -18,7 +18,7 @@
                 <div class="logo">
                     <i class="fa-solid fa-user-shield"></i> Admin Portal
                 </div>
-                <p class="subtitle">Sign in to manage Gourmet Fetch</p>
+                <p class="subtitle">Sign in to manage Desibite</p>
                 <form id="adminLoginForm">
                     <div class="input-group">
                         <i class="fa-regular fa-envelope"></i>
@@ -151,22 +151,24 @@
                                             <input type="number" id="adminFoodPrice" required>
                                         </div>
                                         <div class="form-group">
-                                            <label>Food Image</label>
-                                            <input type="hidden" id="adminFoodImageUrl">
+                                            <label>Food Images (Select multiple)</label>
                                             <div class="upload-zone" id="uploadZone"
                                                 onclick="document.getElementById('adminFoodImageFile').click()">
                                                 <div class="upload-placeholder" id="uploadPlaceholder">
                                                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                                                    <span>Click to upload image</span>
+                                                    <span>Click to upload images</span>
                                                     <small>JPG, PNG, WEBP &mdash; max 30 MB</small>
                                                 </div>
-                                                <img id="imagePreview" class="upload-preview hidden" alt="Preview">
+                                                <div id="imagePreviewContainer" class="image-preview-grid hidden"
+                                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; width: 100%;">
+                                                    <!-- Dynamic previews will be added here -->
+                                                </div>
                                             </div>
-                                            <input type="file" id="adminFoodImageFile" accept="image/*"
+                                            <input type="file" id="adminFoodImageFile" accept="image/*" multiple
                                                 style="display:none">
                                             <button type="button" class="remove-img-btn hidden" id="removeImageBtn"
-                                                onclick="clearImageUpload()">
-                                                <i class="fa-solid fa-xmark"></i> Remove image
+                                                onclick="clearImageUpload()" style="margin-top: 10px;">
+                                                <i class="fa-solid fa-xmark"></i> Clear all images
                                             </button>
                                         </div>
                                         <div class="form-actions">

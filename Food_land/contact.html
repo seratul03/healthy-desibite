@@ -39,7 +39,14 @@
             <li><a href="index.html#gram">On The Gram</a></li>
             <li><a href="contact.html" class="active-link">Contact</a></li>
         </ul>
-        <button class="btn-outline" onclick="window.location.href='index.html#flavors'">Shop Now</button>
+        <div class="nav-right">
+            <a href="/shop"><button class="btn-outline">Shop Now</button></a>
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </nav>
 
     <!-- ================= Contact Hero ================= -->
@@ -263,6 +270,24 @@
             </p>
             <button class="modal-close" id="modal-close-btn">Sounds Great!</button>
         </div>
+    </div>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mob-overlay" id="mobOverlay"></div>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mob-drawer" id="mobDrawer">
+        <div class="mob-drawer-header">
+            <img src="assets/images/brand/logo.png" alt="Logo" style="height: 44px; object-fit: contain;" onerror="this.style.display='none'">
+            <button class="mob-close-btn" id="mobCloseBtn" aria-label="Close menu">&#x2715;</button>
+        </div>
+        <nav class="mob-nav">
+            <a href="index.html#home" class="mob-nav-link">Home</a>
+            <a href="index.html#flavors" class="mob-nav-link">Flavors</a>
+            <a href="index.html#gram" class="mob-nav-link">On The Gram</a>
+            <a href="contact.html" class="mob-nav-link" style="color: #d4af37;">Contact</a>
+            <a href="/shop" class="mob-shop-link">Shop Now</a>
+        </nav>
     </div>
 
     <script src="js/script.js"></script>

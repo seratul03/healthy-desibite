@@ -110,18 +110,28 @@ def get_foods():
         images_res = supabase.table('food_images').select('*').execute()
         
         variants = {v['food_id']: v for v in variants_res.data}
-        images = {i['food_id']: i for i in images_res.data}
+        
+        # Group images by food_id
+        images_by_food = {}
+        for img in images_res.data:
+            fid = img['food_id']
+            if fid not in images_by_food:
+                images_by_food[fid] = []
+            images_by_food[fid].append(img['image_url'])
         
         # Format for frontend
         formatted_foods = []
         for f in foods:
             food_id = f['id']
+            # Fallback to placeholder if no images
+            food_images = images_by_food.get(food_id, ['Foods/placeholder.jpg'])
             formatted_foods.append({
                 'id': food_id,
                 'name': f['name'],
                 'description': f.get('description', ''),
                 'price': variants.get(food_id, {}).get('price', 0),
-                'image': images.get(food_id, {}).get('image_url', 'Foods/placeholder.jpg')
+                'image': food_images[0], # Primary image for listing
+                'images': food_images # Full array for editing
             })
             
         # Sort by creation date or name just for consistency
@@ -152,12 +162,22 @@ def add_food():
             'price': float(data['price'])
         }).execute()
         
-        # Insert Image
-        image_url = data.get('image') or 'Foods/placeholder.jpg'
-        supabase.table('food_images').insert({
-            'food_id': food_id,
-            'image_url': image_url
-        }).execute()
+        # Insert Images
+        images = data.get('images', [])
+        if not images:
+            # Fallback if they sent a single image or nothing
+            single = data.get('image')
+            images = [single] if single else ['Foods/placeholder.jpg']
+
+        image_data = []
+        for img_url in images:
+            image_data.append({
+                'food_id': food_id,
+                'image_url': img_url
+            })
+        
+        if image_data:
+            supabase.table('food_images').insert(image_data).execute()
         
         # Return formatted new food
         new_food = {
@@ -165,7 +185,8 @@ def add_food():
             'name': data['name'],
             'description': data.get('description', ''),
             'price': float(data['price']),
-            'image': image_url
+            'image': images[0] if images else 'Foods/placeholder.jpg',
+            'images': images
         }
         return jsonify({"status": "success", "message": "Food added successfully!", "food": new_food})
     except Exception as e:
@@ -190,18 +211,23 @@ def edit_food(food_id):
                 'price': float(data['price'])
             }).eq('id', variants.data[0]['id']).execute()
             
-        # Update Image
-        images = supabase.table('food_images').select('id').eq('food_id', food_id).execute()
-        if 'image' in data:
-            if images.data:
-                supabase.table('food_images').update({
-                    'image_url': data['image']
-                }).eq('id', images.data[0]['id']).execute()
-            else:
-                supabase.table('food_images').insert({
-                    'food_id': food_id,
-                    'image_url': data['image']
-                }).execute()
+        # Update Images: To keep it clean, delete existing ones and re-insert the provided array
+        if 'images' in data:
+            images = data['images']
+            # Delete old images
+            supabase.table('food_images').delete().eq('food_id', food_id).execute()
+            
+            # Insert new ones
+            if images:
+                image_data = [{'food_id': food_id, 'image_url': img} for img in images]
+                supabase.table('food_images').insert(image_data).execute()
+        elif 'image' in data:
+            # Fallback for old single image updates from elsewhere if they happen
+            supabase.table('food_images').delete().eq('food_id', food_id).execute()
+            supabase.table('food_images').insert({
+                'food_id': food_id,
+                'image_url': data['image']
+            }).execute()
                 
         return jsonify({"status": "success", "message": "Food updated!"})
     except Exception as e:
@@ -222,9 +248,17 @@ def delete_food(food_id):
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
     try:
-        # Fetch orders joined with users to get customer name
-        orders_res = supabase.table('orders').select('*, users_profile(email, name, phone, address)').order('created_at', desc=True).execute()
-        
+        # Fetch orders (no embedded join — orders has no FK to users_profile yet)
+        orders_res = supabase.table('orders').select('*').order('created_at', desc=True).execute()
+        orders = orders_res.data
+
+        # Manually fetch user profiles for the linked user_ids
+        user_ids = list({o['user_id'] for o in orders if o.get('user_id')})
+        profiles = {}
+        if user_ids:
+            profiles_res = supabase.table('users_profile').select('id, email, name').in_('id', user_ids).execute()
+            profiles = {p['id']: p for p in profiles_res.data}
+
         # Need to fetch items too. For simplicity in admin view right now we'll do N+1 or fetch all
         items_res = supabase.table('order_items').select('*, foods(name)').execute()
         items_by_order = {}
@@ -240,7 +274,7 @@ def get_orders():
             
         formatted_orders = []
         for o in orders_res.data:
-            profile = o.get('users_profile') or {}
+            profile = profiles.get(o.get('user_id')) or {}
             formatted_orders.append({
                 'id': o['id'],
                 'customer': profile.get('name') or profile.get('email') or 'Guest',

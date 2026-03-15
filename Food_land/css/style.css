@@ -2102,6 +2102,158 @@ a.ci-value:hover {
   }
 }
 
+/* ── Nav Right (wraps Shop Now + hamburger) ── */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* ── Hamburger Button ── */
+.hamburger-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.hamburger-btn span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #f3dba3;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+.hamburger-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+/* ── Mobile Overlay ── */
+.mob-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mob-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ── Mobile Drawer ── */
+.mob-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    max-width: 82vw;
+    height: 100%;
+    height: 100dvh;
+    background: #0c291f;
+    border-left: 1px solid rgba(212, 175, 55, 0.4);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    padding: 1.5rem;
+    overflow-y: auto;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mob-drawer.active {
+    right: 0;
+}
+
+.mob-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mob-close-btn {
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #f3dba3;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.mob-close-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.mob-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.mob-nav-link {
+    display: block;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    color: #aab5b0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.mob-nav-link:hover {
+    background: rgba(212, 175, 55, 0.08);
+    color: #f3dba3;
+}
+
+.mob-shop-link {
+    display: block;
+    margin-top: 0.75rem;
+    padding: 0.95rem 1rem;
+    text-align: center;
+    background: transparent;
+    border: 1px solid #d4af37;
+    border-radius: 50px;
+    color: #d4af37;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.mob-shop-link:hover {
+    background: #d4af37;
+    color: #071e16;
+}
+
 @media (max-width: 768px) {
   /* Contact page responsive */
   .contact-columns {
@@ -2143,7 +2295,15 @@ a.ci-value:hover {
     display: none;
   }
 
-  /* Could be replaced by a hamburger menu */
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .nav-right > a {
+    display: none;
+  }
+
+  /* Comment removed — hamburger is now implemented above */
 
   .hero {
     flex-direction: column;
