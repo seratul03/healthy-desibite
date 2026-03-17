@@ -51,7 +51,7 @@
                         </li>
                         <li>
                             <a href="#" class="tab-link" data-tab="orders" onclick="switchTab('orders')">
-                                <i class="fa-solid fa-clipboard-list"></i> Orders
+                                <i class="fa-solid fa-clipboard-list"></i> Bookings
                             </a>
                         </li>
                         <li>
@@ -82,16 +82,16 @@
                     <div id="tab-analytics" class="tab-content active">
                         <div class="stats-grid">
                             <div class="stat-card border-primary">
-                                <h3>Total Revenue</h3>
-                                <div class="stat-value">₹<span id="statRevenue">0</span></div>
-                            </div>
-                            <div class="stat-card border-blue">
-                                <h3>Total Orders</h3>
+                                <h3>Total Bookings</h3>
                                 <div class="stat-value" id="statOrders">0</div>
                             </div>
-                            <div class="stat-card border-yellow">
-                                <h3>Pending Orders</h3>
+                            <div class="stat-card border-blue">
+                                <h3>Waiting Approval</h3>
                                 <div class="stat-value" id="statPending">0</div>
+                            </div>
+                            <div class="stat-card border-yellow">
+                                <h3>Approved Bookings</h3>
+                                <div class="stat-value" id="statApproved">0</div>
                             </div>
                             <div class="stat-card border-green">
                                 <h3>Menu Items</h3>
@@ -104,7 +104,7 @@
                     <div id="tab-orders" class="tab-content">
                         <div class="card table-card">
                             <div class="card-header">
-                                <h2>Recent Orders</h2>
+                                <h2>Recent Booking Requests</h2>
                                 <button class="action-btn" onclick="loadAdminOrders()"><i
                                         class="fa-solid fa-arrows-rotate"></i> Refresh</button>
                             </div>

@@ -26,7 +26,7 @@ window.switchTab = function (tabName) {
 
     const titles = {
         'analytics': 'Dashboard Analytics',
-        'orders': 'Order Management',
+        'orders': 'Booking Management',
         'menu': 'Menu Management'
     };
     document.getElementById('pageTitle').innerText = titles[tabName];
@@ -98,9 +98,9 @@ async function loadAdminStats() {
     try {
         const res = await fetch('/api/stats');
         const data = await res.json();
-        document.getElementById('statRevenue').innerText = data.revenue.toLocaleString();
         document.getElementById('statOrders').innerText = data.orders;
         document.getElementById('statPending').innerText = data.pending;
+        document.getElementById('statApproved').innerText = data.approved;
         document.getElementById('statItems').innerText = data.items;
     } catch (err) {
         console.error('Failed to load stats', err);
@@ -122,11 +122,12 @@ window.loadAdminOrders = async function () {
 
         orders.forEach(o => {
             const itemsHtml = o.items.map(i => `${i.quantity}x ${i.name}`).join('<br>');
-            const statusClass = o.status.toLowerCase();
+            const statusClass = (o.status || '').toLowerCase().replace(/\s+/g, '-');
 
             const actionSelect = `
                 <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)" ${o.status === 'Cancelled' ? 'disabled' : ''}>
-                    <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                    <option value="Waiting Approval" ${o.status === 'Waiting Approval' || o.status === 'Pending' ? 'selected' : ''}>Waiting Approval</option>
+                    <option value="Approved" ${o.status === 'Approved' ? 'selected' : ''}>Approved</option>
                     <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
                     <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
                     <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>

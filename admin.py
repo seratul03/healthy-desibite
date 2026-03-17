@@ -256,7 +256,7 @@ def get_orders():
         user_ids = list({o['user_id'] for o in orders if o.get('user_id')})
         profiles = {}
         if user_ids:
-            profiles_res = supabase.table('users_profile').select('id, email, name').in_('id', user_ids).execute()
+            profiles_res = supabase.table('users_profile').select('id, email, name, phone').in_('id', user_ids).execute()
             profiles = {p['id']: p for p in profiles_res.data}
 
         # Need to fetch items too. For simplicity in admin view right now we'll do N+1 or fetch all
@@ -278,7 +278,7 @@ def get_orders():
             formatted_orders.append({
                 'id': o['id'],
                 'customer': profile.get('name') or profile.get('email') or 'Guest',
-                'phone': profile.get('phone') or 'N/A', # Add phone to users_profile later if needed, or handle it
+                'phone': profile.get('phone') or 'N/A',
                 'items': items_by_order.get(o['id'], []),
                 'total': float(o['total_amount'] or 0),
                 'status': o['status']
@@ -308,20 +308,20 @@ def get_stats():
         
         orders = orders_res.data
         
-        total_revenue = sum(float(o.get('total_amount') or 0) for o in orders if o.get('status') != 'Cancelled')
         total_orders = len(orders)
-        pending_orders = len([o for o in orders if o.get('status') == 'Pending'])
+        pending_orders = len([o for o in orders if o.get('status') in ('Waiting Approval', 'Pending')])
+        approved_orders = len([o for o in orders if o.get('status') == 'Approved'])
         total_items = foods_res.count if hasattr(foods_res, 'count') else len(foods_res.data) # depending on supabase-py version
         
         return jsonify({
-            "revenue": total_revenue,
             "orders": total_orders,
             "pending": pending_orders,
+            "approved": approved_orders,
             "items": total_items
         })
     except Exception as e:
         print(f"Error fetching stats: {e}")
-        return jsonify({"revenue": 0, "orders": 0, "pending": 0, "items": 0})
+        return jsonify({"orders": 0, "pending": 0, "approved": 0, "items": 0})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

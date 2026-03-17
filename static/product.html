@@ -936,8 +936,8 @@
                             <button class="btn btn-cart" id="addToCartBtn" onclick="addToCart()">
                                 <i class="fa-solid fa-cart-plus"></i> Add to Cart
                             </button>
-                            <button class="btn btn-buy" id="buyNowBtn" onclick="buyNow()">
-                                <i class="fa-solid fa-bolt"></i> Buy Now
+                            <button class="btn btn-buy" id="buyNowBtn" onclick="bookNow()">
+                                <i class="fa-solid fa-bolt"></i> Book Now
                             </button>
                         </div>
                     </div>
@@ -1201,10 +1201,10 @@
             showToast(`${product.name} added to cart`);
         }
 
-        function buyNow() {
+        function bookNow() {
             if (!product) return;
 
-            // Add to cart first so checkout page sees it
+            // Add to cart first so booking page sees it
             const cart = getCart();
             const existing = cart.find(c => c.id === product.id);
             if (existing) {
@@ -1221,8 +1221,8 @@
             }
             saveCart(cart);
 
-            // Navigate to shop with checkout intent
-            window.location.href = '/shop?checkout=1';
+            // Navigate to shop with booking intent
+            window.location.href = '/shop?book=1';
         }
 
         /* ─────────────────────────────────────────────

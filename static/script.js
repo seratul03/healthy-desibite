@@ -30,8 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Handle URL intent params arriving from product page
   const _params = new URLSearchParams(window.location.search);
-  if (_params.get("checkout") === "1" && currentUser && cart.length > 0) {
-    setTimeout(initiateCheckout, 300);
+  if (
+    (_params.get("book") === "1" || _params.get("checkout") === "1") &&
+    currentUser &&
+    cart.length > 0
+  ) {
+    setTimeout(initiateBooking, 300);
   } else if (_params.get("opencart") === "1" && currentUser) {
     setTimeout(openCart, 300);
   }
@@ -170,7 +174,7 @@ window.showProductDetails = function (id) {
 
 window.buyNow = function (id) {
   if (!currentUser) {
-    showToast("Please sign in to make a purchase");
+    showToast("Please sign in to submit a booking request");
     showView("auth-view");
     return;
   }
@@ -185,10 +189,10 @@ window.buyNow = function (id) {
   }
 
   updateCartUI();
-  showToast(`${item.name} ready for checkout`);
+  showToast(`${item.name} added. Complete booking request.`);
 
-  // Force transition to checkout
-  initiateCheckout();
+  // Jump to booking request form.
+  initiateBooking();
 };
 
 // Auth System
@@ -207,16 +211,116 @@ function updateAuthUI() {
     // Update account view details if present
     const accName = document.getElementById("accName");
     const accEmail = document.getElementById("accEmail");
-    const payName = document.getElementById("payName");
+    const bookName = document.getElementById("bookName");
 
     if (accName) accName.innerText = currentUser.name || "User";
     if (accEmail) accEmail.innerText = currentUser.email || "";
-    if (payName && !payName.value) payName.value = currentUser.name || "User";
+    if (bookName && !bookName.value) bookName.value = currentUser.name || "User";
+    loadOrderHistory();
   } else {
     if (accountLinkText) accountLinkText.innerText = "Sign In";
     if (logoutLink) logoutLink.style.display = "none";
     if (mobAccountText) mobAccountText.innerText = "Sign In";
     if (mobLogoutLink) mobLogoutLink.style.display = "none";
+  }
+}
+
+async function loadOrderHistory() {
+  const list = document.getElementById("orderHistoryList");
+  if (!list || !currentUser?.id) {
+    return;
+  }
+
+  list.innerHTML = '<p class="order-history-empty">Loading history...</p>';
+
+  try {
+    const res = await fetch(`/api/orders/history/${encodeURIComponent(currentUser.id)}`);
+    const data = await res.json();
+
+    if (data.status !== "success") {
+      list.innerHTML = '<p class="order-history-empty">Unable to load history.</p>';
+      return;
+    }
+
+    const orders = data.orders || [];
+    if (orders.length === 0) {
+      list.innerHTML = '<p class="order-history-empty">No order history yet.</p>';
+      return;
+    }
+
+    list.innerHTML = orders
+      .map((order) => {
+        const status = order.status || "Unknown";
+        const statusClass = status.toLowerCase().replace(/\s+/g, "-");
+        const dateText = order.created_at
+          ? new Date(order.created_at).toLocaleString()
+          : "Unknown date";
+        const actionHtml = order.trackable
+          ? `<button class="history-track-btn" onclick="trackFromHistory('${order.id}')">Track</button>`
+          : '<span class="history-track-disabled">Not trackable</span>';
+        const items = Array.isArray(order.items) ? order.items : [];
+        const itemsHtml = items.length
+          ? `<div class="order-history-items">${items
+              .map(
+                (item) =>
+                  `<div class="order-history-item-line"><span>${item.quantity}x ${item.name}</span></div>`,
+              )
+              .join("")}</div>`
+          : '<div class="order-history-items"><div class="order-history-item-line"><span>No items found</span></div></div>';
+
+        return `
+          <div class="order-history-item">
+            <div class="order-history-top">
+              <span class="order-history-id">${order.id}</span>
+              <span class="history-status ${statusClass}">${status}</span>
+            </div>
+            ${itemsHtml}
+            <div class="order-history-meta">
+              <span class="order-history-date">${dateText} · ₹${order.total}</span>
+              ${actionHtml}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<p class="order-history-empty">Unable to load history.</p>';
+  }
+}
+
+window.trackFromHistory = function (orderId) {
+  document.getElementById("trackOrderId").value = orderId;
+  showView("track-view");
+  trackOrder();
+};
+
+async function clearDeliveredHistory() {
+  if (!currentUser?.id) {
+    showToast("Please sign in first");
+    return;
+  }
+
+  const confirmed = confirm("Remove all delivered orders from history?");
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `/api/orders/history/${encodeURIComponent(currentUser.id)}/delivered`,
+      { method: "DELETE" },
+    );
+    const data = await res.json();
+    if (data.status === "success") {
+      showToast("Delivered orders removed");
+      loadOrderHistory();
+    } else {
+      showToast(data.message || "Failed to clear delivered orders");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to clear delivered orders");
   }
 }
 
@@ -269,8 +373,11 @@ async function handleAuth(e) {
       showView("menu-view");
       // If user arrived via "Buy Now" or cart icon from product page, trigger the right action
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("checkout") === "1" && cart.length > 0) {
-        setTimeout(initiateCheckout, 350);
+      if (
+        (urlParams.get("book") === "1" || urlParams.get("checkout") === "1") &&
+        cart.length > 0
+      ) {
+        setTimeout(initiateBooking, 350);
       } else if (urlParams.get("opencart") === "1") {
         setTimeout(openCart, 350);
       }
@@ -304,6 +411,10 @@ window.logout = function () {
   document.getElementById("auth-view").classList.add("active");
   const navbar = document.getElementById("mainNavbar");
   if (navbar) navbar.style.display = "none";
+  const list = document.getElementById("orderHistoryList");
+  if (list) {
+    list.innerHTML = '<p class="order-history-empty">No order history yet.</p>';
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
   showToast("Logged out successfully");
 };
@@ -350,9 +461,7 @@ function updateCartUI() {
             </div>
         `;
     document.getElementById("cartTotal").innerText = "0";
-    document.getElementById("payTotal").innerText = "0";
-    if (document.getElementById("qrPayTotal"))
-      document.getElementById("qrPayTotal").innerText = "0";
+    document.getElementById("bookTotal").innerText = "0";
     persistCart();
     return;
   }
@@ -379,10 +488,7 @@ function updateCartUI() {
   });
 
   document.getElementById("cartTotal").innerText = total;
-  document.getElementById("payTotal").innerText = total;
-  if (document.getElementById("qrPayTotal")) {
-    document.getElementById("qrPayTotal").innerText = total;
-  }
+  document.getElementById("bookTotal").innerText = total;
   persistCart(); // sync to localStorage so product.html can read it
 }
 
@@ -391,12 +497,12 @@ window.removeFromCart = function (index) {
   updateCartUI();
 };
 
-window.initiateCheckout = function () {
+window.initiateBooking = function () {
   if (cart.length === 0) {
     showToast("Your cart is empty!");
     return;
   }
-  if (!currentUser && currentUser?.name !== "Admin") {
+  if (!currentUser) {
     const proceed = confirm("You are not logged in. Proceeding as guest?");
     if (!proceed) {
       closeCart();
@@ -405,10 +511,12 @@ window.initiateCheckout = function () {
     }
   }
   closeCart();
-  showView("payment-view");
+  showView("booking-view");
 };
 
-async function handlePayment(e) {
+window.initiateCheckout = window.initiateBooking;
+
+async function handleBooking(e) {
   e.preventDefault();
 
   if (cart.length === 0) {
@@ -419,20 +527,20 @@ async function handlePayment(e) {
   const btn = e.target.querySelector('button[type="submit"]');
   const originalText = btn.innerHTML;
   btn.innerHTML =
-    '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+    '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
   btn.disabled = true;
 
   const orderData = {
     user_id: currentUser ? currentUser.id : null,
-    customer: document.getElementById("payName").value,
-    phone: document.getElementById("payPhone").value,
-    address: document.getElementById("payAddress").value,
+    customer: document.getElementById("bookName").value,
+    phone: document.getElementById("bookPhone").value,
+    address: document.getElementById("bookAddress").value,
     items: cart,
-    total: document.getElementById("payTotal").innerText,
+    total: document.getElementById("bookTotal").innerText,
   };
 
   try {
-    const res = await fetch("/api/checkout", {
+    const res = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderData),
@@ -444,14 +552,15 @@ async function handlePayment(e) {
       cart = [];
       updateCartUI();
       showView("confirmation-view");
-      document.getElementById("paymentForm").reset();
+      document.getElementById("bookingForm").reset();
+      loadOrderHistory();
       if (currentUser)
-        document.getElementById("payName").value = currentUser.name;
+        document.getElementById("bookName").value = currentUser.name;
     } else {
-      showToast("Checkout failed. Please try again.");
+      showToast("Booking request failed. Please try again.");
     }
   } catch (err) {
-    showToast("Error processing order.");
+    showToast("Error submitting booking request.");
     console.error(err);
   } finally {
     btn.innerHTML = originalText;
@@ -461,18 +570,24 @@ async function handlePayment(e) {
 
 // Order Tracking
 window.trackOrder = async function () {
-  const trackId = document.getElementById("trackOrderId").value.trim();
-  if (!trackId) {
+  const rawTrackInput = document.getElementById("trackOrderId").value.trim();
+  if (!rawTrackInput) {
     showToast("Please enter an Order ID");
     return;
   }
+
+  // Allow pasted values like "Order ID: <uuid>" by extracting UUID.
+  const uuidMatch = rawTrackInput.match(
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/,
+  );
+  const trackId = uuidMatch ? uuidMatch[0] : rawTrackInput;
 
   const btn = document.querySelector("#track-view button");
   const originalText = btn.innerHTML;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
   try {
-    const res = await fetch(`/api/orders/${trackId}`);
+    const res = await fetch(`/api/orders/${encodeURIComponent(trackId)}`);
     const data = await res.json();
 
     if (data.status === "success") {
@@ -490,8 +605,12 @@ window.trackOrder = async function () {
       document.getElementById("line1").classList.remove("active");
       document.getElementById("line2").classList.remove("active");
 
-      if (order.status === "Pending") {
+      if (order.status === "Waiting Approval" || order.status === "Pending") {
         document.getElementById("stepPending").classList.add("active");
+      } else if (order.status === "Approved") {
+        document.getElementById("stepPending").classList.add("active");
+        document.getElementById("line1").classList.add("active");
+        document.getElementById("stepPreparing").classList.add("active");
       } else if (order.status === "Preparing") {
         document.getElementById("stepPending").classList.add("active");
         document.getElementById("line1").classList.add("active");
@@ -508,7 +627,7 @@ window.trackOrder = async function () {
         document.getElementById("trackStatusText").style.color = "#EF4444";
       }
     } else {
-      showToast("Order not found. Check the ID.");
+      showToast(data.message || "Order not found. Check the ID.");
       document.getElementById("trackResult").style.display = "none";
     }
   } catch (err) {
@@ -543,20 +662,30 @@ function setupEventListeners() {
     .getElementById("toggleAuth")
     .addEventListener("click", toggleAuthMode);
   document.getElementById("accountLink").addEventListener("click", () => {
-    if (currentUser) showView("account-view");
+    if (currentUser) {
+      showView("account-view");
+      loadOrderHistory();
+    }
     else showView("auth-view");
   });
 
   document
-    .getElementById("paymentForm")
-    .addEventListener("submit", handlePayment);
+    .getElementById("clearDeliveredBtn")
+    .addEventListener("click", clearDeliveredHistory);
+
+  document
+    .getElementById("bookingForm")
+    .addEventListener("submit", handleBooking);
 
   // Mobile nav drawer
   document.getElementById("hamburgerBtn").addEventListener("click", openMobileNav);
   document.getElementById("mobNavOverlay").addEventListener("click", closeMobileNav);
   document.getElementById("mobAccountLink").addEventListener("click", () => {
     closeMobileNav();
-    if (currentUser) showView("account-view");
+    if (currentUser) {
+      showView("account-view");
+      loadOrderHistory();
+    }
     else showView("auth-view");
   });
   document.getElementById("mobSearchInput").addEventListener("input", function () {

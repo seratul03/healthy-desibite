@@ -118,6 +118,15 @@
                         <span class="value" id="accEmail"></span>
                     </div>
                 </div>
+                <div class="order-history-wrap">
+                    <div class="order-history-head">
+                        <h3>Order History</h3>
+                        <button type="button" class="secondary-btn btn-sm" id="clearDeliveredBtn">Clear Delivered</button>
+                    </div>
+                    <div id="orderHistoryList" class="order-history-list">
+                        <p class="order-history-empty">No order history yet.</p>
+                    </div>
+                </div>
                 <button class="danger-btn btn-lg" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log
                     Out</button>
             </div>
@@ -138,12 +147,12 @@
                     <div class="status-indicator">
                         <div class="status-step active" id="stepPending">
                             <div class="step-icon"><i class="fa-solid fa-clock"></i></div>
-                            <p>Pending</p>
+                            <p>Waiting Approval</p>
                         </div>
                         <div class="status-line" id="line1"></div>
                         <div class="status-step" id="stepPreparing">
-                            <div class="step-icon"><i class="fa-solid fa-fire-burner"></i></div>
-                            <p>Preparing</p>
+                            <div class="step-icon"><i class="fa-solid fa-user-check"></i></div>
+                            <p>Approved</p>
                         </div>
                         <div class="status-line" id="line2"></div>
                         <div class="status-step" id="stepDelivered">
@@ -152,86 +161,48 @@
                         </div>
                     </div>
                     <div class="track-details">
-                        <h3 id="trackStatusText">Status: Pending</h3>
+                        <h3 id="trackStatusText">Status: Waiting Approval</h3>
                         <p id="trackOrderTotal" class="highlight-text"></p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Payment View -->
-        <section id="payment-view" class="view form-view">
+        <!-- Booking View -->
+        <section id="booking-view" class="view form-view">
             <div class="glass-card checkout-card">
                 <div class="checkout-header">
-                    <h2>Secure Checkout</h2>
-                    <div class="payment-summary">Total: ₹<span id="payTotal">0</span></div>
+                    <h2>Booking Request</h2>
+                    <div class="payment-summary">Estimated Total: ₹<span id="bookTotal">0</span></div>
                 </div>
 
-                <form id="paymentForm">
+                <form id="bookingForm">
                     <div class="form-grid">
                         <div class="form-section">
                             <h3><span class="step-num">1</span> Delivery Details</h3>
                             <div class="input-group">
                                 <i class="fa-regular fa-user"></i>
-                                <input type="text" id="payName" placeholder="Full Name" required>
+                                <input type="text" id="bookName" placeholder="Full Name" required>
                             </div>
                             <div class="input-group">
                                 <i class="fa-solid fa-phone"></i>
-                                <input type="tel" id="payPhone" placeholder="Phone Number" required>
+                                <input type="tel" id="bookPhone" placeholder="Phone Number" required>
                             </div>
                             <div class="input-group texture-group">
-                                <textarea id="payAddress" placeholder="Full Delivery Address" rows="3"
+                                <textarea id="bookAddress" placeholder="Full Delivery Address" rows="3"
                                     required></textarea>
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <h3><span class="step-num">2</span> Payment Details</h3>
-
-                            <div class="payment-methods" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="radio" name="paymentMethod" value="card" checked
-                                        onchange="document.getElementById('cardPayment').style.display='block'; document.getElementById('qrPayment').style.display='none';">
-                                    <i class="fa-regular fa-credit-card"></i> Credit/Debit Card
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="radio" name="paymentMethod" value="qr"
-                                        onchange="document.getElementById('cardPayment').style.display='none'; document.getElementById('qrPayment').style.display='flex';">
-                                    <i class="fa-solid fa-qrcode"></i> Scan QR Code
-                                </label>
-                            </div>
-
-                            <div id="cardPayment">
-                                <div class="input-group">
-                                    <i class="fa-regular fa-credit-card"></i>
-                                    <input type="text" placeholder="Cardholder Name">
-                                </div>
-                                <div class="input-group">
-                                    <i class="fa-brands fa-cc-visa"></i>
-                                    <input type="text" placeholder="Card Number (16 digits)" maxlength="16">
-                                </div>
-                                <div class="form-row">
-                                    <div class="input-group">
-                                        <input type="text" placeholder="MM/YY" maxlength="5">
-                                    </div>
-                                    <div class="input-group">
-                                        <input type="password" placeholder="CVV" maxlength="3">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="qrPayment"
-                                style="display: none; flex-direction: column; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center;">
-                                <p style="margin-bottom: 1rem; color: var(--text-muted);">Scan this QR code with any UPI
-                                    or bank app to pay securely.</p>
-                                <div
-                                    style="background: white; padding: 10px; border-radius: 8px; display: inline-block;">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=gourmetfetch@bank&pn=GourmetFetch&cu=INR"
-                                        alt="Payment QR Code">
-                                </div>
-                                <p style="margin-top: 1rem; font-weight: 600; color: var(--primary);">Amount to pay:
-                                    ₹<span id="qrPayTotal">0</span></p>
-                            </div>
+                            <h3><span class="step-num">2</span> What Happens Next</h3>
+                            <p style="line-height: 1.7; color: var(--text-muted);">
+                                Your request enters the waiting list immediately. Admin will review and approve before
+                                delivery starts.
+                            </p>
+                            <p style="margin-top: 0.75rem; font-weight: 600; color: var(--primary);">
+                                No online payment is required on this website.
+                            </p>
                         </div>
                     </div>
 
@@ -239,7 +210,7 @@
                         <button type="button" class="secondary-btn btn-lg" onclick="showView('menu-view')">Back to
                             Menu</button>
                         <button type="submit" class="primary-btn btn-lg checkout-submit"><i
-                                class="fa-solid fa-lock"></i> Pay Now</button>
+                                class="fa-solid fa-paper-plane"></i> Submit Booking Request</button>
                     </div>
                 </form>
             </div>
@@ -251,9 +222,20 @@
                 <div class="success-icon">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h2>Order Confirmed!</h2>
+                <h2>Booking Request Submitted!</h2>
                 <p>Order ID: <strong id="orderIdText" class="highlight"></strong></p>
-                <p>Your food is being prepared and will be delivered to you shortly.</p>
+                <p>Your request is now in the waiting list. Admin approval is required before preparation starts.</p>
+                <div class="confirm-contact-links">
+                    <a href="https://wa.me/918293252837" target="_blank" rel="noopener">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="mailto:barshanmaity2006@gmail.com">
+                        <i class="fa-regular fa-envelope"></i> Email
+                    </a>
+                    <a href="https://instagram.com/thehealthydesibite" target="_blank" rel="noopener">
+                        <i class="fa-brands fa-instagram"></i> Instagram
+                    </a>
+                </div>
                 <button class="primary-btn btn-lg mt-4" onclick="showView('track-view')">Track Order</button>
                 <button class="secondary-btn btn-lg" onclick="showView('menu-view')">Back to Menu</button>
             </div>
@@ -281,7 +263,7 @@
                     <div class="pd-actions">
                         <button class="secondary-btn btn-lg" id="pdAddBtn"><i class="fa-solid fa-cart-plus"></i> Add to
                             Cart</button>
-                        <button class="primary-btn btn-lg" id="pdBuyBtn"><i class="fa-solid fa-bolt"></i> Buy
+                        <button class="primary-btn btn-lg" id="pdBuyBtn"><i class="fa-solid fa-bolt"></i> Book
                             Now</button>
                     </div>
                 </div>
@@ -314,7 +296,7 @@
                 <h3>₹<span id="cartTotal">0</span></h3>
             </div>
             <button id="checkoutBtn" class="primary-btn btn-lg cart-checkout-btn" onclick="initiateCheckout()">
-                Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+                Submit Booking Request <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>

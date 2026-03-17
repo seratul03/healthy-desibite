@@ -474,6 +474,16 @@ body {
     color: #D97706;
 }
 
+.badge.waiting-approval {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.badge.approved {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
 .badge.preparing {
     background: #DBEAFE;
     color: #2563EB;
