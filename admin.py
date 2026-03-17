@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__, static_folder='admin_static', static_url_path='')
 
-BASE_DIR = r"C:\Users\Seratul Mustakim\Desktop\My Works\Food delivery web"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(os.path.join(BASE_DIR, "admin_static"), exist_ok=True)
 
 # Supabase Setup — loaded from .env (service role key for admin operations)
@@ -324,4 +324,5 @@ def get_stats():
         return jsonify({"revenue": 0, "orders": 0, "pending": 0, "items": 0})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=False, host='0.0.0.0', port=port)
