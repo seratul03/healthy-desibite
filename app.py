@@ -54,7 +54,7 @@ def product_page(product_id):
 @app.route('/api/product/<product_id>', methods=['GET'])
 def get_product(product_id):
     try:
-        food_res = supabase.table('foods').select('*').eq('id', product_id).execute()
+        food_res = supabase.table('foods').select('*').eq('id', product_id).eq('is_available', True).execute()
         if not food_res.data:
             return jsonify({'status': 'error', 'message': 'Product not found'}), 404
         food = food_res.data[0]
@@ -63,7 +63,7 @@ def get_product(product_id):
         image_res = supabase.table('food_images').select('*').eq('food_id', product_id).execute()
 
         price = float(variant_res.data[0]['price']) if variant_res.data else 0.0
-        
+
         images = [img['image_url'] for img in image_res.data] if image_res.data else []
         image = images[0] if images else ''
 
@@ -89,14 +89,14 @@ def serve_static(filename):
 @app.route('/api/foods', methods=['GET'])
 def get_foods():
     try:
-        # Fetch foods where is_available is true (optional, depends on schema defaults)
-        foods_res = supabase.table('foods').select('*').execute()
+        # Fetch only available foods
+        foods_res = supabase.table('foods').select('*').eq('is_available', True).execute()
         foods = foods_res.data
-        
+
         # Fetch variants and images
         variants_res = supabase.table('food_variants').select('*').execute()
         images_res = supabase.table('food_images').select('*').execute()
-        
+
         variants = {v['food_id']: v for v in variants_res.data}
         # Group images by food_id
         images_by_food = {}
@@ -105,7 +105,7 @@ def get_foods():
             if fid not in images_by_food:
                 images_by_food[fid] = []
             images_by_food[fid].append(img['image_url'])
-        
+
         formatted_foods = []
         for f in foods:
             food_id = f['id']
@@ -119,7 +119,7 @@ def get_foods():
                 'image': food_images[0], # Primary image for listing
                 'images': food_images # Full array for internal use
             })
-            
+
         formatted_foods.sort(key=lambda x: x['name'])
         return jsonify(formatted_foods)
     except Exception as e:

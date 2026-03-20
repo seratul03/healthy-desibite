@@ -101,16 +101,16 @@ def upload_image():
 @app.route('/api/foods', methods=['GET'])
 def get_foods():
     try:
-        # Fetch foods
-        foods_res = supabase.table('foods').select('*').execute()
+        # Fetch only available foods
+        foods_res = supabase.table('foods').select('*').eq('is_available', True).execute()
         foods = foods_res.data
-        
+
         # Fetch variants and images
         variants_res = supabase.table('food_variants').select('*').execute()
         images_res = supabase.table('food_images').select('*').execute()
-        
+
         variants = {v['food_id']: v for v in variants_res.data}
-        
+
         # Group images by food_id
         images_by_food = {}
         for img in images_res.data:
@@ -118,7 +118,7 @@ def get_foods():
             if fid not in images_by_food:
                 images_by_food[fid] = []
             images_by_food[fid].append(img['image_url'])
-        
+
         # Format for frontend
         formatted_foods = []
         for f in foods:
@@ -133,7 +133,7 @@ def get_foods():
                 'image': food_images[0], # Primary image for listing
                 'images': food_images # Full array for editing
             })
-            
+
         # Sort by creation date or name just for consistency
         formatted_foods.sort(key=lambda x: x['name'])
         return jsonify(formatted_foods)
@@ -237,18 +237,52 @@ def edit_food(food_id):
 @app.route('/api/foods/<food_id>', methods=['DELETE'])
 def delete_food(food_id):
     try:
-        # Supabase CASCADE delete will handle variants and images
+        print(f"Delete request for food_id: {food_id}")
+
+        # Verify food exists first
+        food_check = supabase.table('foods').select('id').eq('id', food_id).execute()
+        if not food_check.data:
+            print(f"Food not found: {food_id}")
+            return jsonify({"status": "error", "message": "Food item not found"}), 404
+
+        # 1. Delete food images
+        supabase.table('food_images').delete().eq('food_id', food_id).execute()
+        print(f"Deleted images for food_id: {food_id}")
+
+        # 2. Delete food variants (will fail if referenced by orders - catch and handle)
+        try:
+            supabase.table('food_variants').delete().eq('food_id', food_id).execute()
+            print(f"Deleted variants for food_id: {food_id}")
+        except Exception as variant_error:
+            # If FK constraint prevents deletion, it means this food is in active orders
+            # In this case, just mark as unavailable instead
+            if '23503' in str(variant_error):
+                print(f"Food referenced by orders, marking unavailable instead: {food_id}")
+                supabase.table('foods').update({'is_available': False}).eq('id', food_id).execute()
+                return jsonify({
+                    "status": "success",
+                    "message": "Food marked unavailable (has existing orders). Will be hidden from menu."
+                })
+            else:
+                raise
+
+        # 3. Finally delete the food itself
         supabase.table('foods').delete().eq('id', food_id).execute()
-        return jsonify({"status": "success", "message": "Food deleted!"})
+        print(f"Successfully deleted food: {food_id}")
+
+        return jsonify({"status": "success", "message": "Food completely removed!"})
+
     except Exception as e:
-        print(f"Error deleting food: {e}")
+        print(f"Error deleting food {food_id}: {type(e).__name__}: {str(e)}")
         return jsonify({"status": "error", "message": "Failed to delete food"}), 500
 
 # --- ORDERS API ---
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
     try:
-        # Fetch orders (no embedded join — orders has no FK to users_profile yet)
+        from datetime import datetime, timedelta
+
+        # Fetch orders with all required fields
         orders_res = supabase.table('orders').select('*').order('created_at', desc=True).execute()
         orders = orders_res.data
 
@@ -256,10 +290,10 @@ def get_orders():
         user_ids = list({o['user_id'] for o in orders if o.get('user_id')})
         profiles = {}
         if user_ids:
-            profiles_res = supabase.table('users_profile').select('id, email, name, phone').in_('id', user_ids).execute()
+            profiles_res = supabase.table('users_profile').select('id, email, name, phone, address').in_('id', user_ids).execute()
             profiles = {p['id']: p for p in profiles_res.data}
 
-        # Need to fetch items too. For simplicity in admin view right now we'll do N+1 or fetch all
+        # Fetch items
         items_res = supabase.table('order_items').select('*, foods(name)').execute()
         items_by_order = {}
         for item in items_res.data:
@@ -271,18 +305,53 @@ def get_orders():
                 'quantity': item['quantity'],
                 'price': float(item['price'])
             })
-            
+
+        # Apply query parameters for filtering
+        status_filter = request.args.get('status')
+        search_query = request.args.get('search', '').lower()
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+        sort_by = request.args.get('sort_by', 'date')  # 'date' or 'amount'
+
         formatted_orders = []
-        for o in orders_res.data:
+        for o in orders:
             profile = profiles.get(o.get('user_id')) or {}
+            customer_name = profile.get('name') or profile.get('email') or 'Guest'
+
+            # Apply filters
+            if status_filter and o.get('status') != status_filter:
+                continue
+
+            if search_query:
+                search_in = (customer_name + profile.get('email', '') + o['id']).lower()
+                if search_query not in search_in:
+                    continue
+
+            if date_from or date_to:
+                order_date = o.get('created_at', '')[:10] if o.get('created_at') else ''
+                if date_from and order_date < date_from:
+                    continue
+                if date_to and order_date > date_to:
+                    continue
+
             formatted_orders.append({
                 'id': o['id'],
-                'customer': profile.get('name') or profile.get('email') or 'Guest',
+                'customer': customer_name,
                 'phone': profile.get('phone') or 'N/A',
+                'address': profile.get('address') or 'N/A',
                 'items': items_by_order.get(o['id'], []),
                 'total': float(o['total_amount'] or 0),
-                'status': o['status']
+                'status': o['status'],
+                'created_at': o.get('created_at'),
+                'user_id': o.get('user_id')
             })
+
+        # Apply sorting
+        if sort_by == 'amount':
+            formatted_orders.sort(key=lambda x: x['total'], reverse=True)
+        else:
+            formatted_orders.sort(key=lambda x: x['created_at'] or '', reverse=True)
+
         return jsonify(formatted_orders)
     except Exception as e:
         print(f"Error fetching orders: {e}")
@@ -298,30 +367,191 @@ def update_order_status(order_id):
         print(f"Error updating order status: {e}")
         return jsonify({"status": "error"}), 500
 
+@app.route('/api/orders/<order_id>/details', methods=['GET'])
+def get_order_details(order_id):
+    try:
+        # Fetch order
+        order_res = supabase.table('orders').select('*').eq('id', order_id).execute()
+        if not order_res.data:
+            return jsonify({"status": "error", "message": "Order not found"}), 404
+
+        order = order_res.data[0]
+
+        # Fetch user profile
+        profile = {}
+        if order.get('user_id'):
+            profile_res = supabase.table('users_profile').select('*').eq('id', order.get('user_id')).execute()
+            if profile_res.data:
+                profile = profile_res.data[0]
+
+        # Fetch order items with food details
+        items_res = supabase.table('order_items').select('*, foods(id, name, description), food_variants(variant_name)').eq('order_id', order_id).execute()
+        items = []
+        for item in items_res.data:
+            items.append({
+                'id': item['id'],
+                'food_id': item['food_id'],
+                'name': item['foods']['name'] if item.get('foods') else 'Unknown Item',
+                'description': item['foods'].get('description', '') if item.get('foods') else '',
+                'quantity': item['quantity'],
+                'price': float(item['price']),
+                'variant': item['food_variants'].get('variant_name', 'Default') if item.get('food_variants') else 'Default'
+            })
+
+        return jsonify({
+            'status': 'success',
+            'order': {
+                'id': order['id'],
+                'status': order['status'],
+                'total': float(order['total_amount'] or 0),
+                'created_at': order.get('created_at'),
+                'customer': {
+                    'name': profile.get('name', 'Guest'),
+                    'email': profile.get('email', 'N/A'),
+                    'phone': profile.get('phone', 'N/A'),
+                    'address': profile.get('address', 'N/A')
+                },
+                'items': items
+            }
+        })
+    except Exception as e:
+        print(f"Error fetching order details {order_id}: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch order details"}), 500
+
+@app.route('/api/orders/<order_id>', methods=['DELETE'])
+def delete_order(order_id):
+    try:
+        # Verify order exists
+        order_res = supabase.table('orders').select('id, status').eq('id', order_id).execute()
+        if not order_res.data:
+            return jsonify({"status": "error", "message": "Order not found"}), 404
+
+        order = order_res.data[0]
+
+        # Only allow deletion of completed orders (Cancelled or Delivered)
+        if order['status'] not in ('Cancelled', 'Delivered'):
+            return jsonify({
+                "status": "error",
+                "message": f"Can only delete Cancelled or Delivered orders. This order is {order['status']}"
+            }), 400
+
+        # Delete order items first (cascade won't work for this simple delete)
+        supabase.table('order_items').delete().eq('order_id', order_id).execute()
+
+        # Delete the order
+        supabase.table('orders').delete().eq('id', order_id).execute()
+
+        return jsonify({"status": "success", "message": f"Order {order_id} deleted successfully"})
+    except Exception as e:
+        print(f"Error deleting order {order_id}: {e}")
+        return jsonify({"status": "error", "message": "Failed to delete order"}), 500
+
 # --- STATS API ---
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     try:
-        # A bit clunky to do this all in memory, but fine for small datasets
-        orders_res = supabase.table('orders').select('total_amount, status').execute()
-        foods_res = supabase.table('foods').select('id', count='exact').execute()
-        
+        from datetime import datetime, date
+
+        # Fetch all orders with details
+        orders_res = supabase.table('orders').select('id, total_amount, status, created_at, user_id').execute()
         orders = orders_res.data
-        
+
+        # Fetch available foods only
+        foods_res = supabase.table('foods').select('id').eq('is_available', True).execute()
+
+        # Fetch all order items for popular items calculation
+        items_res = supabase.table('order_items').select('food_id, quantity').execute()
+        order_items = items_res.data
+
+        # Fetch user profiles for top customers
+        user_ids = list({o['user_id'] for o in orders if o.get('user_id')})
+        profiles = {}
+        if user_ids:
+            profiles_res = supabase.table('users_profile').select('id, name, email').in_('id', user_ids).execute()
+            profiles = {p['id']: p for p in profiles_res.data}
+
+        # Basic counts
         total_orders = len(orders)
-        pending_orders = len([o for o in orders if o.get('status') in ('Waiting Approval', 'Pending')])
-        approved_orders = len([o for o in orders if o.get('status') == 'Approved'])
-        total_items = foods_res.count if hasattr(foods_res, 'count') else len(foods_res.data) # depending on supabase-py version
-        
+        total_items = len(foods_res.data) if foods_res.data else 0
+
+        # Revenue calculations
+        total_revenue = sum(float(o.get('total_amount') or 0) for o in orders)
+        avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+
+        # Today's revenue
+        today = date.today().isoformat()
+        today_revenue = 0
+        for o in orders:
+            if o.get('created_at'):
+                order_date = o['created_at'][:10]  # Extract YYYY-MM-DD
+                if order_date == today:
+                    today_revenue += float(o.get('total_amount') or 0)
+
+        # Status breakdown
+        status_breakdown = {}
+        for o in orders:
+            status = o.get('status', 'Unknown')
+            status_breakdown[status] = status_breakdown.get(status, 0) + 1
+
+        # Popular items (top 5 by quantity)
+        items_count = {}
+        items_names = {}
+        for item in order_items:
+            food_id = item.get('food_id')
+            quantity = item.get('quantity', 0)
+            if food_id:
+                items_count[food_id] = items_count.get(food_id, 0) + quantity
+
+        # Get food names for top items
+        if items_count:
+            top_food_ids = sorted(items_count.items(), key=lambda x: x[1], reverse=True)[:5]
+            top_food_ids_list = [fid for fid, _ in top_food_ids]
+            if top_food_ids_list:
+                foods_detail = supabase.table('foods').select('id, name').in_('id', top_food_ids_list).execute()
+                items_names = {f['id']: f['name'] for f in foods_detail.data}
+
+        popular_items = [
+            {
+                'name': items_names.get(fid, 'Unknown'),
+                'quantity': qty
+            }
+            for fid, qty in sorted(items_count.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+
+        # Top customers (by order count)
+        customer_orders = {}
+        for o in orders:
+            user_id = o.get('user_id')
+            if user_id:
+                customer_orders[user_id] = customer_orders.get(user_id, 0) + 1
+
+        top_customers = [
+            {
+                'name': profiles.get(uid, {}).get('name', profiles.get(uid, {}).get('email', 'Unknown')),
+                'orders': count
+            }
+            for uid, count in sorted(customer_orders.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+
         return jsonify({
             "orders": total_orders,
-            "pending": pending_orders,
-            "approved": approved_orders,
-            "items": total_items
+            "pending": status_breakdown.get('Waiting Approval', 0) + status_breakdown.get('Pending', 0),
+            "approved": status_breakdown.get('Approved', 0),
+            "items": total_items,
+            "total_revenue": round(total_revenue, 2),
+            "today_revenue": round(today_revenue, 2),
+            "avg_order_value": round(avg_order_value, 2),
+            "status_breakdown": status_breakdown,
+            "popular_items": popular_items,
+            "top_customers": top_customers
         })
     except Exception as e:
         print(f"Error fetching stats: {e}")
-        return jsonify({"orders": 0, "pending": 0, "approved": 0, "items": 0})
+        return jsonify({
+            "orders": 0, "pending": 0, "approved": 0, "items": 0,
+            "total_revenue": 0, "today_revenue": 0, "avg_order_value": 0,
+            "status_breakdown": {}, "popular_items": [], "top_customers": []
+        })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
