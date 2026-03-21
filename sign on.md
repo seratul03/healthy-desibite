@@ -1,190 +1,343 @@
-# **Formal Technical Report: Python Compiler Repository**
+Privacy Policy
 
-## **1. Introduction**
+Last Updated: 21/03/2006
 
-The **Python Compiler** project is a software system designed to simulate or implement the core phases of a compiler using the Python programming language. The primary objective of this repository is to demonstrate fundamental compiler design concepts such as lexical analysis, syntax parsing, semantic validation, and intermediate or executable code generation.
+Welcome to Healthy Desi Bite. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website and services.
 
-This project serves both as:
-
-* An **educational tool** for understanding compiler construction
-* A **practical implementation** of language processing techniques
 
 ---
 
-## **2. Objectives**
+1. Information We Collect
 
-The key objectives of the project include:
+When you use our website, we may collect the following information:
 
-* To design a **basic compiler pipeline**
-* To implement **lexical and syntactic analysis**
-* To process high-level code into structured representations
-* To demonstrate **error detection and handling mechanisms**
-* To provide a foundation for further enhancements such as optimization and code generation
+a) Personal Information
 
----
+Name
 
-## **3. System Architecture**
+Phone number
 
-The compiler follows a modular pipeline architecture consisting of the following stages:
+Email address
 
-### **3.1 Lexical Analysis (Tokenizer / Lexer)**
+Delivery address (location)
 
-* Converts raw input code into tokens
-* Identifies keywords, identifiers, operators, and literals
-* Removes whitespace and comments
 
-### **3.2 Syntax Analysis (Parser)**
+b) Order Information
 
-* Validates token sequence against grammar rules
-* Constructs parse trees or abstract syntax trees (AST)
-* Detects syntax errors
+Products ordered
 
-### **3.3 Semantic Analysis**
+Payment details (processed securely via third-party payment providers)
 
-* Ensures logical correctness of statements
-* Performs type checking and variable validation
-* Maintains symbol tables
+Order history
 
-### **3.4 Intermediate Representation (Optional)**
 
-* Converts parsed code into an intermediate form (IR)
-* Helps in further processing or optimization
+c) Technical Information
 
-### **3.5 Code Execution / Generation**
+IP address
 
-* Either:
+Device information
 
-  * Interprets the parsed structure
-  * Or generates executable/output code
+Browser type
+
+Website usage data (cookies, analytics)
+
+
 
 ---
 
-## **4. Features**
+2. How We Use Your Information
 
-### **Core Features**
+We use your information for the following purposes:
 
-* Tokenization of input source code
-* Syntax validation using parsing techniques
-* Error reporting (lexical and syntactic)
-* Structured representation of code (AST or similar)
-* Execution or evaluation of parsed expressions
+To process and deliver your orders
 
-### **Advanced / Possible Features (depending on implementation)**
+To track and update order status
 
-* Symbol table management
-* Support for arithmetic/logical expressions
-* Control structures (if, loops)
-* Intermediate code generation
-* Debugging support
+To contact you regarding your order
 
----
+To provide customer support
 
-## **5. Technology Stack**
+To improve our website and services
 
-### **Programming Language**
+To send updates, offers, or promotional messages (only if you agree)
 
-* **Python**
 
-  * Used for implementing all compiler stages
-  * Enables rapid prototyping and readability
-
-### **Libraries / Tools (Typical for such repos)**
-
-* `re` (Regular Expressions) – for lexical analysis
-* `sys` – for input/output handling
-* Custom parser logic (recursive descent / LL parsing)
-
-### **Development Environment**
-
-* Any Python IDE (VS Code, PyCharm, etc.)
-* Command-line interface for execution
 
 ---
 
-## **6. Design Methodology**
+3. Location Tracking
 
-The project follows a **modular and layered design approach**:
+We collect and use your location (delivery address) only for:
 
-* Each compiler phase is implemented as an independent module
-* Data flows sequentially between phases
-* Errors are handled at each stage to prevent cascading failures
+Accurate order delivery
 
-### **Algorithmic Techniques**
+Efficient logistics and tracking
 
-* **Finite State Machines (FSM)** for lexical analysis
-* **Recursive Descent Parsing** or rule-based parsing
-* **Tree Traversal Algorithms** for evaluation
+
+We do not use your location for any unauthorized purposes.
+
 
 ---
 
-## **7. Input and Output**
+4. Sharing of Information
 
-### **Input**
+We do not sell your personal data.
 
-* Source code written in a simplified programming language
+We may share your information only with:
 
-### **Output**
+Delivery partners (to deliver your order)
 
-* Tokens (from lexer)
-* Parse tree / AST (from parser)
-* Execution result or intermediate representation
+Payment gateways (to process payments securely)
 
----
+Legal authorities (if required by law)
 
-## **8. Error Handling**
 
-The system includes mechanisms for:
-
-* **Lexical Errors**
-
-  * Invalid tokens
-* **Syntax Errors**
-
-  * Incorrect grammar usage
-* **Semantic Errors**
-
-  * Undefined variables, type mismatches
-
-Errors are reported with:
-
-* Line numbers
-* Error descriptions
 
 ---
 
-## **9. Applications**
+5. Data Security
 
-* Educational use in **compiler design courses**
-* Understanding **programming language processing**
-* Basis for building:
+We take appropriate security measures to protect your information:
 
-  * Interpreters
-  * Domain-specific languages (DSLs)
-  * Static analyzers
+Secure servers and encryption
 
----
+Limited access to personal data
 
-## **10. Limitations**
+Regular monitoring for security risks
 
-* Likely supports a **limited subset of language constructs**
-* Minimal or no optimization phase
-* May not generate machine-level code
-* Performance not optimized for large-scale compilation
+
+However, no method of transmission over the internet is 100% secure.
+
 
 ---
 
-## **11. Future Enhancements**
+6. Cookies and Tracking Technologies
 
-* Implementation of **code optimization techniques**
-* Support for **full programming language grammar**
-* Addition of **bytecode or machine code generation**
-* Integration with **GUI for visualization**
-* Implementation of **advanced parsing (LR/LL(k))**
+We use cookies to:
+
+Improve user experience
+
+Analyze website traffic
+
+Remember your preferences
+
+
+You can disable cookies in your browser settings if you prefer.
+
 
 ---
 
-## **12. Conclusion**
+7. Your Rights
 
-The Python Compiler project successfully demonstrates the fundamental concepts of compiler construction using a high-level programming language. Its modular architecture and clear implementation make it an effective learning tool for students and developers interested in language processing and systems design.
+You have the right to:
+
+Access your personal data
+
+Request correction of your data
+
+Request deletion of your data
+
+
+To do so, contact us at:
+📧 healthydesibite@gmail.com
+
 
 ---
+
+8. Third-Party Services
+
+Our website may use third-party services (like payment gateways or analytics tools). These services have their own privacy policies.
+
+
+---
+
+9. Changes to This Policy
+
+We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date.
+
+
+---
+
+10. Contact Us
+
+If you have any questions about this Privacy Policy, please contact us:
+
+📧 Email: healthydesibite@gmail.com
+📞 Phone: 8293252837
+
+
+---
+
+Terms & Conditions
+
+Last Updated: 21/03/2026
+
+Welcome to Healthy Desi Bite. By accessing or using our website, you agree to comply with and be bound by the following Terms & Conditions. Please read them carefully.
+
+
+---
+
+1. General
+
+These Terms govern your use of our website and services.
+
+By placing an order, you agree to these Terms.
+
+We reserve the right to update or modify these Terms at any time.
+
+
+
+---
+
+2. Products & Services
+
+We sell packaged food products under the brand Healthy Desi Bite.
+
+All products are subject to availability.
+
+We reserve the right to discontinue or modify products without prior notice.
+
+
+
+---
+
+3. Pricing & Payments
+
+All prices are listed in INR (₹) and are inclusive/exclusive of taxes (mention as per your setup).
+
+We accept payments via secure third-party payment gateways.
+
+We reserve the right to change prices at any time without prior notice.
+
+
+
+---
+
+4. Order Acceptance & Cancellation
+
+Once you place an order, you will receive a confirmation.
+
+We reserve the right to cancel any order due to:
+
+Product unavailability
+
+Payment issues
+
+Incorrect information provided
+
+
+Customers can request cancellation before the order is shipped.
+
+
+
+---
+
+5. Shipping & Delivery
+
+We aim to deliver products within the estimated time mentioned.
+
+Delivery time may vary based on location and external factors.
+
+We are not responsible for delays caused by courier partners.
+
+
+
+---
+
+6. Use of Information
+
+By using our website, you agree that we may collect and use your:
+
+Phone number
+
+Email address
+
+Delivery location
+
+
+This is strictly for:
+
+Order processing
+
+Delivery tracking
+
+Customer communication
+
+
+(For full details, refer to our Privacy Policy.)
+
+
+---
+
+7. User Responsibilities
+
+You agree:
+
+To provide accurate and complete information
+
+Not to misuse the website
+
+Not to engage in fraudulent activities
+
+
+
+---
+
+8. Intellectual Property
+
+All content on this website (logo, images, text, branding) belongs to Healthy Desi Bite.
+
+You may not copy, reproduce, or use it without permission.
+
+
+
+---
+
+9. Limitation of Liability
+
+We are not liable for any indirect or incidental damages arising from the use of our products or website.
+
+Our liability is limited to the value of the product purchased.
+
+
+
+---
+
+10. Food Product Disclaimer
+
+Our products are made with care and quality ingredients.
+
+Customers should check ingredients for allergies before consumption.
+
+We are not responsible for allergic reactions.
+
+
+
+---
+
+11. Third-Party Services
+
+We use third-party services like payment gateways and delivery partners.
+
+We are not responsible for issues caused by these third parties.
+
+
+
+---
+
+12. Governing Law
+
+These Terms are governed by the laws of India.
+
+Any disputes will be subject to the jurisdiction of [Your City – e.g., Kolkata, West Bengal].
+
+
+
+---
+
+13. Contact Information
+
+For any questions or concerns:
+
+📧 Email: healthydesibite@gmail.com
+📞 Phone: 8293252837
